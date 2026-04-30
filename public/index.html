@@ -3,45 +3,62 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>フィードバック & Bitcoin報酬</title>
+  <title>SatsReview</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #f5f5f5; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem; }
-    .card { background: white; border-radius: 16px; padding: 2rem; max-width: 480px; width: 100%; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+    .card { background: white; border-radius: 16px; padding: 2rem; max-width: 520px; width: 100%; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+
+    /* 言語切り替え */
+    .lang-switch { display: flex; gap: 6px; margin-bottom: 1.25rem; }
+    .lang-btn { padding: 6px 16px; border: 1px solid #e0e0e0; border-radius: 8px; background: #f5f5f5; font-size: 13px; color: #888; cursor: pointer; }
+    .lang-btn.on { background: white; border-color: #999; color: #111; font-weight: 500; }
+
     h1 { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
-    .sub { font-size: 14px; color: #888; margin-bottom: 1.5rem; }
-    .label { font-size: 13px; color: #555; margin-bottom: 6px; display: block; }
-    .stars { display: flex; gap: 8px; margin-bottom: 1.25rem; }
-    .star { font-size: 28px; cursor: pointer; color: #ddd; transition: color 0.1s; line-height: 1; }
-    .star.on { color: #f59e0b; }
-    input[type="email"] { width: 100%; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 15px; margin-bottom: 1rem; outline: none; }
-    input[type="email"]:focus { border-color: #666; }
-    textarea { width: 100%; min-height: 120px; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 15px; resize: vertical; outline: none; line-height: 1.6; }
-    textarea:focus { border-color: #666; }
-    .hint { font-size: 12px; color: #aaa; margin-top: 5px; margin-bottom: 1.25rem; }
-    .btn { width: 100%; padding: 13px; font-size: 15px; font-weight: 600; background: #111; color: white; border: none; border-radius: 10px; cursor: pointer; margin-top: 0.5rem; transition: opacity 0.1s; }
+    .sub { font-size: 13px; color: #888; margin-bottom: 1.25rem; }
+
+    /* セクション */
+    .section { border: 1px solid #efefef; border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; }
+    .sec-label { font-size: 11px; font-weight: 500; color: #aaa; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 1rem; display: block; }
+    .q-text { font-size: 14px; color: #333; margin-bottom: 8px; line-height: 1.5; }
+    .choices { display: flex; gap: 8px; }
+    .choice { flex: 1; padding: 8px 6px; border: 1px solid #e8e8e8; border-radius: 8px; background: #f8f8f8; font-size: 13px; color: #888; cursor: pointer; text-align: center; line-height: 1.3; transition: all 0.1s; }
+    .choice:hover { border-color: #ccc; color: #333; }
+    .choice.on { background: #E1F5EE; border-color: #1D9E75; color: #085041; }
+    .question { margin-bottom: 1.25rem; }
+    .question:last-child { margin-bottom: 0; }
+    .divider { border: none; border-top: 1px solid #f0f0f0; margin: 1rem 0; }
+
+    textarea { width: 100%; min-height: 100px; padding: 10px 12px; border: 1px solid #e8e8e8; border-radius: 8px; font-size: 14px; resize: vertical; outline: none; line-height: 1.6; background: #f8f8f8; font-family: inherit; color: #333; }
+    textarea:focus { border-color: #aaa; background: white; }
+    .char-row { display: flex; justify-content: space-between; align-items: center; margin-top: 5px; }
+    .hint { font-size: 12px; color: #bbb; }
+
+    .btn { width: 100%; padding: 13px; font-size: 15px; font-weight: 600; background: #111; color: white; border: none; border-radius: 10px; cursor: pointer; margin-top: 0.25rem; transition: opacity 0.1s; }
     .btn:hover { opacity: 0.85; }
     .btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
+    /* ローディング */
+    .loading { text-align: center; padding: 2rem; color: #888; font-size: 15px; display: none; }
+
     /* 結果画面 */
-    .result { display: none; text-align: center; }
+    .result { display: none; }
     .scores { display: flex; gap: 10px; margin: 1rem 0; }
-    .sc { flex: 1; background: #f8f8f8; border-radius: 10px; padding: 0.75rem 0.5rem; }
-    .sc-num { font-size: 20px; font-weight: 600; }
+    .sc { flex: 1; background: #f8f8f8; border-radius: 10px; padding: 0.75rem 0.5rem; text-align: center; }
+    .sc-num { font-size: 20px; font-weight: 600; color: #111; }
     .sc-lbl { font-size: 11px; color: #888; margin-top: 3px; }
     .bar-bg { background: #eee; border-radius: 3px; height: 4px; margin-top: 6px; }
-    .bar { height: 4px; border-radius: 3px; background: #22c55e; }
-    .ai-msg { font-size: 14px; color: #555; line-height: 1.65; padding: 0.75rem 1rem; background: #f8f8f8; border-radius: 8px; text-align: left; margin: 0.75rem 0 1.25rem; }
-    .sats-label { font-size: 13px; color: #888; margin-bottom: 6px; }
-    .sats-num { font-size: 36px; font-weight: 700; color: #f59e0b; margin-bottom: 1.25rem; }
+    .bar { height: 4px; border-radius: 3px; background: #1D9E75; }
+    .ai-msg { font-size: 14px; color: #555; line-height: 1.65; padding: 0.75rem 1rem; background: #f8f8f8; border-radius: 8px; margin: 0.75rem 0 1.25rem; }
+    .sats-label { font-size: 13px; color: #888; margin-bottom: 6px; text-align: center; }
+    .sats-num { font-size: 36px; font-weight: 700; color: #f59e0b; margin-bottom: 1.25rem; text-align: center; }
     .qr-wrap { display: flex; justify-content: center; margin-bottom: 1rem; }
     #qrcode { width: 200px; height: 200px; }
-    .invoice-box { font-size: 11px; color: #aaa; word-break: break-all; background: #f8f8f8; padding: 8px; border-radius: 6px; margin-bottom: 1rem; cursor: pointer; }
-    .invoice-box:hover { background: #eee; }
-    .expire { font-size: 12px; color: #f87171; margin-bottom: 1rem; }
-    .back-btn { font-size: 14px; color: #888; background: none; border: none; cursor: pointer; text-decoration: underline; }
-    .loading { text-align: center; padding: 2rem; color: #888; font-size: 15px; display: none; }
+    .lnurl-box { font-size: 11px; color: #aaa; word-break: break-all; background: #f8f8f8; padding: 8px; border-radius: 6px; margin-bottom: 0.5rem; cursor: pointer; }
+    .lnurl-box:hover { background: #eee; }
+    .expire { font-size: 12px; color: #f87171; margin-bottom: 1rem; text-align: center; }
+    .back-btn { font-size: 14px; color: #aaa; background: none; border: none; cursor: pointer; text-decoration: underline; display: block; text-align: center; margin-top: 0.5rem; }
   </style>
 </head>
 <body>
@@ -49,24 +66,44 @@
 
   <!-- フォーム画面 -->
   <div id="form-view">
-    <h1>イベントのご感想</h1>
-    <p class="sub">具体的なフィードバックほどBitcoin報酬が増えます ⚡</p>
-
-    <span class="label">満足度</span>
-    <div class="stars" id="stars">
-      <span class="star" data-v="1">★</span>
-      <span class="star" data-v="2">★</span>
-      <span class="star" data-v="3">★</span>
-      <span class="star" data-v="4">★</span>
-      <span class="star" data-v="5">★</span>
+    <div class="lang-switch">
+      <button class="lang-btn on" onclick="setLang('ja', this)">日本語</button>
+      <button class="lang-btn" onclick="setLang('en', this)">English</button>
+      <button class="lang-btn" onclick="setLang('ko', this)">한국어</button>
     </div>
 
-    <span class="label">受け取り用メールアドレス（任意）</span>
-    <input type="email" id="email" placeholder="wallet@example.com または空白でOK">
+    <h1 id="title">SatsReview について</h1>
+    <p class="sub" id="sub">率直な感想を聞かせてください。具体的なほど報酬が増えます ⚡</p>
 
-    <span class="label">コメント</span>
-    <textarea id="comment" placeholder="例：セッション2の〇〇さんの話が具体的で参考になりました。次回は懇親会の時間をもう少し長くしてほしいです。" oninput="updateCount()"></textarea>
-    <p class="hint"><span id="cc">0</span>文字　— 具体的なほど報酬UP（最大50 sats）</p>
+    <div class="section">
+      <span class="sec-label" id="sec-label">AI評価 × Bitcoin報酬の組み合わせについて</span>
+      <div class="question">
+        <div class="q-text" id="q1">「AI評価＋Bitcoin報酬」の組み合わせは自然だと思いますか？</div>
+        <div class="choices" id="choices1">
+          <div class="choice" onclick="pick(this)">不自然だと思う</div>
+          <div class="choice" onclick="pick(this)">どちらでもない</div>
+          <div class="choice" onclick="pick(this)">自然だと思う</div>
+        </div>
+      </div>
+      <hr class="divider">
+      <div class="question">
+        <div class="q-text" id="q2">この仕組みがあることで、フィードバックの質が上がると思いますか？</div>
+        <div class="choices" id="choices2">
+          <div class="choice" onclick="pick(this)">そう思わない</div>
+          <div class="choice" onclick="pick(this)">どちらでもない</div>
+          <div class="choice" onclick="pick(this)">そう思う</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <span class="sec-label" id="sec-label2">自由記述</span>
+      <textarea id="comment" placeholder="感想や改善点があれば教えてください。具体的なほど獲得satsが増えます。" oninput="document.getElementById('cc').textContent=this.value.length"></textarea>
+      <div class="char-row">
+        <span class="hint" id="hint">具体的なエピソードや改善案があるとスコアが上がります</span>
+        <span class="hint"><span id="cc">0</span>文字</span>
+      </div>
+    </div>
 
     <button class="btn" id="submit-btn" onclick="submitForm()">送信して報酬を受け取る ⚡</button>
   </div>
@@ -74,126 +111,199 @@
   <!-- ローディング -->
   <div class="loading" id="loading">
     <div style="font-size:24px;margin-bottom:8px;">⚡</div>
-    評価中です...
+    <span id="loading-msg">評価中です...</span>
   </div>
 
   <!-- 結果画面 -->
   <div class="result" id="result-view">
-    <h1>評価結果</h1>
+    <h1 id="result-title">評価結果</h1>
     <div class="scores" id="scores"></div>
     <div class="ai-msg" id="ai-msg"></div>
-    <div class="sats-label">獲得報酬</div>
+    <div class="sats-label" id="sats-label">獲得報酬</div>
     <div class="sats-num" id="sats-num">-- sats</div>
     <div class="qr-wrap"><div id="qrcode"></div></div>
-    <div style="font-size:13px;color:#888;margin-bottom:6px;">ウォレットでスキャンして受け取ってください</div>
-    <div class="invoice-box" id="invoice-box" onclick="copyInvoice()" title="クリックでコピー">
-      LNURL読み込み中...
-    </div>
+    <div style="font-size:13px;color:#aaa;margin-bottom:6px;text-align:center;" id="scan-msg">ウォレットでスキャンして受け取ってください</div>
+    <div class="lnurl-box" id="lnurl-box" onclick="copyLnurl()" title="クリックでコピー">読み込み中...</div>
     <div class="expire" id="expire"></div>
-    <button class="back-btn" onclick="goBack()">← 別のフィードバックを送る</button>
+    <button class="back-btn" id="back-btn" onclick="goBack()">← 別のフィードバックを送る</button>
   </div>
 
 </div>
 
 <script>
-  let starVal = 0;
-  let currentInvoice = "";
-  let expireTimer = null;
+  const i18n = {
+    ja: {
+      title: 'SatsReview について',
+      sub: '率直な感想を聞かせてください。具体的なほど報酬が増えます ⚡',
+      secLabel: 'AI評価 × Bitcoin報酬の組み合わせについて',
+      q1: '「AI評価＋Bitcoin報酬」の組み合わせは自然だと思いますか？',
+      c1: ['不自然だと思う', 'どちらでもない', '自然だと思う'],
+      q2: 'この仕組みがあることで、フィードバックの質が上がると思いますか？',
+      c2: ['そう思わない', 'どちらでもない', 'そう思う'],
+      secLabel2: '自由記述',
+      placeholder: '感想や改善点があれば教えてください。具体的なほど獲得satsが増えます。',
+      hint: '具体的なエピソードや改善案があるとスコアが上がります',
+      submit: '送信して報酬を受け取る ⚡',
+      loading: '評価中です...',
+      resultTitle: '評価結果',
+      satsLabel: '獲得報酬',
+      scanMsg: 'ウォレットでスキャンして受け取ってください',
+      expire: '※ このQRは1回のみ使用できます',
+      back: '← 別のフィードバックを送る',
+      scoreNames: { specificity: '具体性', actionability: '有用性', sentiment_balance: 'バランス' },
+      copied: 'コピーしました！',
+      errShort: 'コメントを入力してください',
+      errApi: 'エラーが発生しました: ',
+    },
+    en: {
+      title: 'About SatsReview',
+      sub: 'Share your honest thoughts. More specific = more sats ⚡',
+      secLabel: 'About the AI evaluation × Bitcoin reward combination',
+      q1: 'Do you think "AI evaluation + Bitcoin reward" feels natural?',
+      c1: ['Feels unnatural', 'Neutral', 'Feels natural'],
+      q2: 'Do you think this system will improve the quality of feedback?',
+      c2: ["I don't think so", 'Neutral', 'I think so'],
+      secLabel2: 'Comments',
+      placeholder: 'Any thoughts or suggestions? More specific feedback earns more sats.',
+      hint: 'Specific episodes or improvement ideas will boost your score',
+      submit: 'Submit & claim reward ⚡',
+      loading: 'Evaluating...',
+      resultTitle: 'Your Score',
+      satsLabel: 'Reward earned',
+      scanMsg: 'Scan with your Lightning wallet to receive',
+      expire: '※ This QR can only be used once',
+      back: '← Submit another feedback',
+      scoreNames: { specificity: 'Specificity', actionability: 'Usefulness', sentiment_balance: 'Balance' },
+      copied: 'Copied!',
+      errShort: 'Please enter a comment',
+      errApi: 'Error: ',
+    },
+    ko: {
+      title: 'SatsReview 에 대해',
+      sub: '솔직한 의견을 들려주세요. 구체적일수록 보상이 늘어납니다 ⚡',
+      secLabel: 'AI 평가 × Bitcoin 보상 조합에 대해',
+      q1: '"AI 평가 + Bitcoin 보상"의 조합이 자연스럽다고 생각하시나요？',
+      c1: ['부자연스럽다', '잘 모르겠다', '자연스럽다'],
+      q2: '이 시스템이 있으면 피드백의 질이 높아질 것 같나요？',
+      c2: ['그렇게 생각하지 않는다', '잘 모르겠다', '그렇게 생각한다'],
+      secLabel2: '자유 의견',
+      placeholder: '느낀 점이나 개선 사항이 있으면 알려주세요. 구체적일수록 sats가 늘어납니다.',
+      hint: '구체적인 에피소드나 개선 아이디어가 있으면 점수가 올라갑니다',
+      submit: '제출하고 보상 받기 ⚡',
+      loading: '평가 중...',
+      resultTitle: '평가 결과',
+      satsLabel: '획득 보상',
+      scanMsg: '지갑으로 스캔해서 받으세요',
+      expire: '※ 이 QR은 한 번만 사용할 수 있습니다',
+      back: '← 다른 피드백 보내기',
+      scoreNames: { specificity: '구체성', actionability: '유용성', sentiment_balance: '균형' },
+      copied: '복사했습니다！',
+      errShort: '의견을 입력해 주세요',
+      errApi: '오류가 발생했습니다: ',
+    },
+  };
 
-  // 星評価
-  document.querySelectorAll('.star').forEach(s => {
-    s.addEventListener('mouseover', () => hlStar(+s.dataset.v));
-    s.addEventListener('mouseout', () => hlStar(starVal));
-    s.addEventListener('click', () => { starVal = +s.dataset.v; hlStar(starVal); });
-  });
-  function hlStar(v) {
-    document.querySelectorAll('.star').forEach(s => s.classList.toggle('on', +s.dataset.v <= v));
+  let currentLang = 'ja';
+  let currentLnurl = '';
+
+  function setLang(lang, btn) {
+    currentLang = lang;
+    const t = i18n[lang];
+    document.getElementById('title').textContent = t.title;
+    document.getElementById('sub').textContent = t.sub;
+    document.getElementById('sec-label').textContent = t.secLabel;
+    document.getElementById('q1').textContent = t.q1;
+    document.getElementById('q2').textContent = t.q2;
+    document.getElementById('sec-label2').textContent = t.secLabel2;
+    document.getElementById('comment').placeholder = t.placeholder;
+    document.getElementById('hint').textContent = t.hint;
+    document.getElementById('submit-btn').textContent = t.submit;
+    document.getElementById('back-btn').textContent = t.back;
+    const c1 = document.getElementById('choices1').querySelectorAll('.choice');
+    const c2 = document.getElementById('choices2').querySelectorAll('.choice');
+    t.c1.forEach((txt, i) => c1[i].textContent = txt);
+    t.c2.forEach((txt, i) => c2[i].textContent = txt);
+    document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    document.querySelectorAll('.choice').forEach(c => c.classList.remove('on'));
   }
-  function updateCount() {
-    document.getElementById('cc').textContent = document.getElementById('comment').value.length;
+
+  function pick(el) {
+    el.closest('.choices').querySelectorAll('.choice').forEach(c => c.classList.remove('on'));
+    el.classList.add('on');
   }
 
   async function submitForm() {
+    const t = i18n[currentLang];
     const comment = document.getElementById('comment').value.trim();
-    const email = document.getElementById('email').value.trim();
-    if (comment.length < 5) { alert('コメントを入力してください'); return; }
+    if (comment.length < 5) { alert(t.errShort); return; }
 
-    // ローディング表示
+    document.getElementById('submit-btn').disabled = true;
     document.getElementById('form-view').style.display = 'none';
+    document.getElementById('loading-msg').textContent = t.loading;
     document.getElementById('loading').style.display = 'block';
 
     try {
       const res = await fetch('/api/evaluate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ comment, star: starVal, email })
+        body: JSON.stringify({ comment, star: 0, lang: currentLang })
       });
-
       if (!res.ok) throw new Error('APIエラー: ' + res.status);
       const data = await res.json();
-
       showResult(data);
     } catch(err) {
-      alert('エラーが発生しました: ' + err.message);
+      alert(t.errApi + err.message);
       document.getElementById('form-view').style.display = 'block';
     } finally {
       document.getElementById('loading').style.display = 'none';
+      document.getElementById('submit-btn').disabled = false;
     }
   }
 
   function showResult(data) {
-    // スコア表示（commentは除外）
-    const scoreNames = { specificity: '具体性', actionability: '有用性', sentiment_balance: 'バランス' };
+    const t = i18n[currentLang];
     const scoreKeys = ['specificity', 'actionability', 'sentiment_balance'];
     const scoresHtml = scoreKeys.map(k => `
       <div class="sc">
         <div class="sc-num">${data.scores[k]}/10</div>
         <div class="bar-bg"><div class="bar" style="width:${data.scores[k]*10}%"></div></div>
-        <div class="sc-lbl">${scoreNames[k]}</div>
+        <div class="sc-lbl">${t.scoreNames[k]}</div>
       </div>`).join('');
     document.getElementById('scores').innerHTML = scoresHtml;
-
-    // AIコメント・sats
+    document.getElementById('result-title').textContent = t.resultTitle;
     document.getElementById('ai-msg').textContent = data.comment;
+    document.getElementById('sats-label').textContent = t.satsLabel;
     document.getElementById('sats-num').textContent = data.sats + ' sats';
+    document.getElementById('scan-msg').textContent = t.scanMsg;
+    document.getElementById('expire').textContent = t.expire;
+    document.getElementById('back-btn').textContent = t.back;
 
-    // QRコード（LNURLw）
     document.getElementById('qrcode').innerHTML = '';
-    currentInvoice = data.lnurl;
-    document.getElementById('invoice-box').textContent = data.lnurl;
-
+    currentLnurl = data.lnurl;
+    document.getElementById('lnurl-box').textContent = data.lnurl;
     new QRCode(document.getElementById('qrcode'), {
-      text: data.lnurl,
-      width: 200,
-      height: 200,
-      colorDark: '#111',
-      colorLight: '#ffffff',
+      text: data.lnurl, width: 200, height: 200, colorDark: '#111', colorLight: '#ffffff',
     });
 
-    // 有効期限表示（1回使い切り）
-    document.getElementById('expire').textContent = '※ このQRは1回のみ使用できます';
-
-    // 画面切り替え
     document.getElementById('result-view').style.display = 'block';
   }
 
-  function copyInvoice() {
-    navigator.clipboard.writeText(currentInvoice).then(() => {
-      document.getElementById('invoice-box').textContent = 'コピーしました！';
-      setTimeout(() => {
-        document.getElementById('invoice-box').textContent = currentInvoice;
-      }, 1500);
+  function copyLnurl() {
+    const t = i18n[currentLang];
+    navigator.clipboard.writeText(currentLnurl).then(() => {
+      document.getElementById('lnurl-box').textContent = t.copied;
+      setTimeout(() => { document.getElementById('lnurl-box').textContent = currentLnurl; }, 1500);
     });
   }
 
   function goBack() {
-    if (expireTimer) clearInterval(expireTimer);
     document.getElementById('result-view').style.display = 'none';
     document.getElementById('form-view').style.display = 'block';
     document.getElementById('comment').value = '';
     document.getElementById('cc').textContent = '0';
-    starVal = 0;
-    hlStar(0);
+    document.querySelectorAll('.choice').forEach(c => c.classList.remove('on'));
+    document.getElementById('qrcode').innerHTML = '';
   }
 </script>
 </body>
