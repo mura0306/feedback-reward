@@ -1,9 +1,6 @@
 // api/evaluate.js
-// Vercel Serverless Function
-// フィードバック評価 + LNbits Invoice発行
-
-const LNBITS_URL    = process.env.LNBITS_URL;      // 例: https://legend.lnbits.com
-const LNBITS_KEY    = process.env.LNBITS_API_KEY;  // Invoice/read key
+const LNBITS_URL    = process.env.LNBITS_URL;
+const LNBITS_KEY    = process.env.LNBITS_API_KEY;
 const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
 const BASE_SATS     = 10;
 const MAX_SATS      = 50;
@@ -11,16 +8,13 @@ const MAX_SATS      = 50;
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { comment, star, email } = req.body;
+  const { comment, star } = req.body;
   if (!comment || comment.length < 5) return res.status(400).json({ error: 'コメントが短すぎます' });
 
   try {
-    // 1. AIでスコア評価
     const scores = await evaluateWithClaude(comment, star);
-    const avg    = Object.values(scores).reduce((a, b) => a + b, 0) / 3;
+    const avg    = (scores.specificity + scores.actionability + scores.sentiment_balance) / 3;
     const sats   = Math.round(BASE_SATS + (avg / 10) * (MAX_SATS - BASE_SATS));
-
-    // 2. LNbitsでInvoice発行
     const invoice = await createLNbitsInvoice(sats, comment);
 
     res.status(200).json({
@@ -31,21 +25,19 @@ export default async function handler(req, res) {
       paymentHash: invoice.payment_hash,
     });
   } catch (err) {
-    console.error(err);
+    console.error('ERROR:', err.message);
     res.status(500).json({ error: err.message });
   }
 }
 
-// -------------------------------------------------------
-// Claude APIでフィードバック評価
-// -------------------------------------------------------
 async function evaluateWithClaude(comment, star) {
-  const prompt = `イベントフィードバックを3軸で評価し、JSONのみ返してください。
+  const prompt = `イベントフィードバックを3軸で評価し、JSONのみ返してください。余計な文字は不要です。
 
 フィードバック:「${comment}」
 星評価: ${star || '未選択'}/5
 
-{"specificity":0から10の整数,"actionability":0から10の整数,"sentiment_balance":0から10の整数,"comment":"日本語で2文のコメント"}`;
+返却形式:
+{"specificity":7,"actionability":5,"sentiment_balance":6,"comment":"コメント1文目。コメント2文目。"}`;
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
@@ -55,27 +47,35 @@ async function evaluateWithClaude(comment, star) {
       'anthropic-version': '2023-06-01',
     },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-haiku-4-5-20251001',
       max_tokens: 300,
       messages: [{ role: 'user', content: prompt }],
     }),
   });
 
   const data = await response.json();
-  const raw  = data.content.map(i => i.text || '').join('').replace(/```json|```/g, '').trim();
+  console.log('Anthropic status:', response.status);
+  console.log('Anthropic response:', JSON.stringify(data));
+
+  if (!response.ok) {
+    throw new Error(`Anthropic APIエラー: ${data.error?.message || response.status}`);
+  }
+
+  if (!data.content || !Array.isArray(data.content)) {
+    throw new Error(`予期しないレスポンス: ${JSON.stringify(data)}`);
+  }
+
+  const raw    = data.content.map(i => i.text || '').join('').replace(/```json|```/g, '').trim();
   const result = JSON.parse(raw);
 
   return {
-    specificity:        Math.min(10, Math.max(0, Math.round(result.specificity))),
-    actionability:      Math.min(10, Math.max(0, Math.round(result.actionability))),
-    sentiment_balance:  Math.min(10, Math.max(0, Math.round(result.sentiment_balance))),
-    comment:            result.comment,
+    specificity:       Math.min(10, Math.max(0, Math.round(result.specificity))),
+    actionability:     Math.min(10, Math.max(0, Math.round(result.actionability))),
+    sentiment_balance: Math.min(10, Math.max(0, Math.round(result.sentiment_balance))),
+    comment:           result.comment,
   };
 }
 
-// -------------------------------------------------------
-// LNbitsでLightning Invoice発行
-// -------------------------------------------------------
 async function createLNbitsInvoice(sats, memo) {
   const response = await fetch(`${LNBITS_URL}/api/v1/payments`, {
     method: 'POST',
@@ -93,7 +93,7 @@ async function createLNbitsInvoice(sats, memo) {
 
   if (!response.ok) {
     const err = await response.text();
-    throw new Error(`LNbits エラー: ${err}`);
+    throw new Error(`LNbitsエラー: ${err}`);
   }
 
   return response.json();
