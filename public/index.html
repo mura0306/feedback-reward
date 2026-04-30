@@ -85,8 +85,9 @@
     <div class="sats-label">獲得報酬</div>
     <div class="sats-num" id="sats-num">-- sats</div>
     <div class="qr-wrap"><div id="qrcode"></div></div>
+    <div style="font-size:13px;color:#888;margin-bottom:6px;">ウォレットでスキャンして受け取ってください</div>
     <div class="invoice-box" id="invoice-box" onclick="copyInvoice()" title="クリックでコピー">
-      Invoiceを読み込み中...
+      LNURL読み込み中...
     </div>
     <div class="expire" id="expire"></div>
     <button class="back-btn" onclick="goBack()">← 別のフィードバックを送る</button>
@@ -141,13 +142,14 @@
   }
 
   function showResult(data) {
-    // スコア表示
+    // スコア表示（commentは除外）
     const scoreNames = { specificity: '具体性', actionability: '有用性', sentiment_balance: 'バランス' };
-    const scoresHtml = Object.entries(data.scores).map(([k, v]) => `
+    const scoreKeys = ['specificity', 'actionability', 'sentiment_balance'];
+    const scoresHtml = scoreKeys.map(k => `
       <div class="sc">
-        <div class="sc-num">${v}/10</div>
-        <div class="bar-bg"><div class="bar" style="width:${v*10}%"></div></div>
-        <div class="sc-lbl">${scoreNames[k] || k}</div>
+        <div class="sc-num">${data.scores[k]}/10</div>
+        <div class="bar-bg"><div class="bar" style="width:${data.scores[k]*10}%"></div></div>
+        <div class="sc-lbl">${scoreNames[k]}</div>
       </div>`).join('');
     document.getElementById('scores').innerHTML = scoresHtml;
 
@@ -155,34 +157,21 @@
     document.getElementById('ai-msg').textContent = data.comment;
     document.getElementById('sats-num').textContent = data.sats + ' sats';
 
-    // QRコード
+    // QRコード（LNURLw）
     document.getElementById('qrcode').innerHTML = '';
-    currentInvoice = data.invoice;
-    document.getElementById('invoice-box').textContent = data.invoice;
+    currentInvoice = data.lnurl;
+    document.getElementById('invoice-box').textContent = data.lnurl;
 
     new QRCode(document.getElementById('qrcode'), {
-      text: data.invoice,
+      text: data.lnurl,
       width: 200,
       height: 200,
       colorDark: '#111',
       colorLight: '#ffffff',
     });
 
-    // 有効期限カウントダウン
-    if (expireTimer) clearInterval(expireTimer);
-    let remaining = 3600;
-    function updateExpire() {
-      const m = Math.floor(remaining / 60);
-      const s = remaining % 60;
-      document.getElementById('expire').textContent = `有効期限: ${m}分${s}秒`;
-      remaining--;
-      if (remaining < 0) {
-        clearInterval(expireTimer);
-        document.getElementById('expire').textContent = '⚠ このInvoiceは期限切れです';
-      }
-    }
-    updateExpire();
-    expireTimer = setInterval(updateExpire, 1000);
+    // 有効期限表示（1回使い切り）
+    document.getElementById('expire').textContent = '※ このQRは1回のみ使用できます';
 
     // 画面切り替え
     document.getElementById('result-view').style.display = 'block';
