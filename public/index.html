@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>フィードバック & Bitcoin報酬</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #f5f5f5; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+    .card { background: white; border-radius: 16px; padding: 2rem; max-width: 480px; width: 100%; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+    h1 { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
+    .sub { font-size: 14px; color: #888; margin-bottom: 1.5rem; }
+    .label { font-size: 13px; color: #555; margin-bottom: 6px; display: block; }
+    .stars { display: flex; gap: 8px; margin-bottom: 1.25rem; }
+    .star { font-size: 28px; cursor: pointer; color: #ddd; transition: color 0.1s; line-height: 1; }
+    .star.on { color: #f59e0b; }
+    input[type="email"] { width: 100%; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 15px; margin-bottom: 1rem; outline: none; }
+    input[type="email"]:focus { border-color: #666; }
+    textarea { width: 100%; min-height: 120px; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 15px; resize: vertical; outline: none; line-height: 1.6; }
+    textarea:focus { border-color: #666; }
+    .hint { font-size: 12px; color: #aaa; margin-top: 5px; margin-bottom: 1.25rem; }
+    .btn { width: 100%; padding: 13px; font-size: 15px; font-weight: 600; background: #111; color: white; border: none; border-radius: 10px; cursor: pointer; margin-top: 0.5rem; transition: opacity 0.1s; }
+    .btn:hover { opacity: 0.85; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* 結果画面 */
+    .result { display: none; text-align: center; }
+    .scores { display: flex; gap: 10px; margin: 1rem 0; }
+    .sc { flex: 1; background: #f8f8f8; border-radius: 10px; padding: 0.75rem 0.5rem; }
+    .sc-num { font-size: 20px; font-weight: 600; }
+    .sc-lbl { font-size: 11px; color: #888; margin-top: 3px; }
+    .bar-bg { background: #eee; border-radius: 3px; height: 4px; margin-top: 6px; }
+    .bar { height: 4px; border-radius: 3px; background: #22c55e; }
+    .ai-msg { font-size: 14px; color: #555; line-height: 1.65; padding: 0.75rem 1rem; background: #f8f8f8; border-radius: 8px; text-align: left; margin: 0.75rem 0 1.25rem; }
+    .sats-label { font-size: 13px; color: #888; margin-bottom: 6px; }
+    .sats-num { font-size: 36px; font-weight: 700; color: #f59e0b; margin-bottom: 1.25rem; }
+    .qr-wrap { display: flex; justify-content: center; margin-bottom: 1rem; }
+    #qrcode { width: 200px; height: 200px; }
+    .invoice-box { font-size: 11px; color: #aaa; word-break: break-all; background: #f8f8f8; padding: 8px; border-radius: 6px; margin-bottom: 1rem; cursor: pointer; }
+    .invoice-box:hover { background: #eee; }
+    .expire { font-size: 12px; color: #f87171; margin-bottom: 1rem; }
+    .back-btn { font-size: 14px; color: #888; background: none; border: none; cursor: pointer; text-decoration: underline; }
+    .loading { text-align: center; padding: 2rem; color: #888; font-size: 15px; display: none; }
+  </style>
+</head>
+<body>
+<div class="card">
+
+  <!-- フォーム画面 -->
+  <div id="form-view">
+    <h1>イベントのご感想</h1>
+    <p class="sub">具体的なフィードバックほどBitcoin報酬が増えます ⚡</p>
+
+    <span class="label">満足度</span>
+    <div class="stars" id="stars">
+      <span class="star" data-v="1">★</span>
+      <span class="star" data-v="2">★</span>
+      <span class="star" data-v="3">★</span>
+      <span class="star" data-v="4">★</span>
+      <span class="star" data-v="5">★</span>
+    </div>
+
+    <span class="label">受け取り用メールアドレス（任意）</span>
+    <input type="email" id="email" placeholder="wallet@example.com または空白でOK">
+
+    <span class="label">コメント</span>
+    <textarea id="comment" placeholder="例：セッション2の〇〇さんの話が具体的で参考になりました。次回は懇親会の時間をもう少し長くしてほしいです。" oninput="updateCount()"></textarea>
+    <p class="hint"><span id="cc">0</span>文字　— 具体的なほど報酬UP（最大50 sats）</p>
+
+    <button class="btn" id="submit-btn" onclick="submitForm()">送信して報酬を受け取る ⚡</button>
+  </div>
+
+  <!-- ローディング -->
+  <div class="loading" id="loading">
+    <div style="font-size:24px;margin-bottom:8px;">⚡</div>
+    評価中です...
+  </div>
+
+  <!-- 結果画面 -->
+  <div class="result" id="result-view">
+    <h1>評価結果</h1>
+    <div class="scores" id="scores"></div>
+    <div class="ai-msg" id="ai-msg"></div>
+    <div class="sats-label">獲得報酬</div>
+    <div class="sats-num" id="sats-num">-- sats</div>
+    <div class="qr-wrap"><div id="qrcode"></div></div>
+    <div class="invoice-box" id="invoice-box" onclick="copyInvoice()" title="クリックでコピー">
+      Invoiceを読み込み中...
+    </div>
+    <div class="expire" id="expire"></div>
+    <button class="back-btn" onclick="goBack()">← 別のフィードバックを送る</button>
+  </div>
+
+</div>
+
+<script>
+  let starVal = 0;
+  let currentInvoice = "";
+  let expireTimer = null;
+
+  // 星評価
+  document.querySelectorAll('.star').forEach(s => {
+    s.addEventListener('mouseover', () => hlStar(+s.dataset.v));
+    s.addEventListener('mouseout', () => hlStar(starVal));
+    s.addEventListener('click', () => { starVal = +s.dataset.v; hlStar(starVal); });
+  });
+  function hlStar(v) {
+    document.querySelectorAll('.star').forEach(s => s.classList.toggle('on', +s.dataset.v <= v));
+  }
+  function updateCount() {
+    document.getElementById('cc').textContent = document.getElementById('comment').value.length;
+  }
+
+  async function submitForm() {
+    const comment = document.getElementById('comment').value.trim();
+    const email = document.getElementById('email').value.trim();
+    if (comment.length < 5) { alert('コメントを入力してください'); return; }
+
+    // ローディング表示
+    document.getElementById('form-view').style.display = 'none';
+    document.getElementById('loading').style.display = 'block';
+
+    try {
+      const res = await fetch('/api/evaluate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ comment, star: starVal, email })
+      });
+
+      if (!res.ok) throw new Error('APIエラー: ' + res.status);
+      const data = await res.json();
+
+      showResult(data);
+    } catch(err) {
+      alert('エラーが発生しました: ' + err.message);
+      document.getElementById('form-view').style.display = 'block';
+    } finally {
+      document.getElementById('loading').style.display = 'none';
+    }
+  }
+
+  function showResult(data) {
+    // スコア表示
+    const scoreNames = { specificity: '具体性', actionability: '有用性', sentiment_balance: 'バランス' };
+    const scoresHtml = Object.entries(data.scores).map(([k, v]) => `
+      <div class="sc">
+        <div class="sc-num">${v}/10</div>
+        <div class="bar-bg"><div class="bar" style="width:${v*10}%"></div></div>
+        <div class="sc-lbl">${scoreNames[k] || k}</div>
+      </div>`).join('');
+    document.getElementById('scores').innerHTML = scoresHtml;
+
+    // AIコメント・sats
+    document.getElementById('ai-msg').textContent = data.comment;
+    document.getElementById('sats-num').textContent = data.sats + ' sats';
+
+    // QRコード
+    document.getElementById('qrcode').innerHTML = '';
+    currentInvoice = data.invoice;
+    document.getElementById('invoice-box').textContent = data.invoice;
+
+    new QRCode(document.getElementById('qrcode'), {
+      text: data.invoice,
+      width: 200,
+      height: 200,
+      colorDark: '#111',
+      colorLight: '#ffffff',
+    });
+
+    // 有効期限カウントダウン
+    if (expireTimer) clearInterval(expireTimer);
+    let remaining = 3600;
+    function updateExpire() {
+      const m = Math.floor(remaining / 60);
+      const s = remaining % 60;
+      document.getElementById('expire').textContent = `有効期限: ${m}分${s}秒`;
+      remaining--;
+      if (remaining < 0) {
+        clearInterval(expireTimer);
+        document.getElementById('expire').textContent = '⚠ このInvoiceは期限切れです';
+      }
+    }
+    updateExpire();
+    expireTimer = setInterval(updateExpire, 1000);
+
+    // 画面切り替え
+    document.getElementById('result-view').style.display = 'block';
+  }
+
+  function copyInvoice() {
+    navigator.clipboard.writeText(currentInvoice).then(() => {
+      document.getElementById('invoice-box').textContent = 'コピーしました！';
+      setTimeout(() => {
+        document.getElementById('invoice-box').textContent = currentInvoice;
+      }, 1500);
+    });
+  }
+
+  function goBack() {
+    if (expireTimer) clearInterval(expireTimer);
+    document.getElementById('result-view').style.display = 'none';
+    document.getElementById('form-view').style.display = 'block';
+    document.getElementById('comment').value = '';
+    document.getElementById('cc').textContent = '0';
+    starVal = 0;
+    hlStar(0);
+  }
+</script>
+</body>
+</html>
