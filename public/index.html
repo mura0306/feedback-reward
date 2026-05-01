@@ -10,7 +10,6 @@
     body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #f5f5f5; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem; }
     .card { background: white; border-radius: 16px; padding: 2rem; max-width: 520px; width: 100%; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
 
-    /* 言語切り替え */
     .lang-switch { display: flex; gap: 6px; margin-bottom: 1.25rem; }
     .lang-btn { padding: 6px 16px; border: 1px solid #e0e0e0; border-radius: 8px; background: #f5f5f5; font-size: 13px; color: #888; cursor: pointer; }
     .lang-btn.on { background: white; border-color: #999; color: #111; font-weight: 500; }
@@ -18,7 +17,6 @@
     h1 { font-size: 20px; font-weight: 600; margin-bottom: 4px; }
     .sub { font-size: 13px; color: #888; margin-bottom: 1.25rem; }
 
-    /* セクション */
     .section { border: 1px solid #efefef; border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; }
     .sec-label { font-size: 11px; font-weight: 500; color: #aaa; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 1rem; display: block; }
     .q-text { font-size: 14px; color: #333; margin-bottom: 8px; line-height: 1.5; }
@@ -39,18 +37,46 @@
     .btn:hover { opacity: 0.85; }
     .btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-    /* ローディング */
     .loading { text-align: center; padding: 2rem; color: #888; font-size: 15px; display: none; }
 
-    /* 結果画面 */
     .result { display: none; }
     .scores { display: flex; gap: 10px; margin: 1rem 0; }
-    .sc { flex: 1; background: #f8f8f8; border-radius: 10px; padding: 0.75rem 0.5rem; text-align: center; }
+    .sc { flex: 1; background: #f8f8f8; border-radius: 10px; padding: 0.75rem 0.5rem; text-align: center; position: relative; cursor: help; }
     .sc-num { font-size: 20px; font-weight: 600; color: #111; }
-    .sc-lbl { font-size: 11px; color: #888; margin-top: 3px; }
+    .sc-lbl { font-size: 11px; color: #888; margin-top: 3px; display: flex; align-items: center; justify-content: center; gap: 3px; }
+    .sc-info { font-size: 10px; color: #bbb; }
     .bar-bg { background: #eee; border-radius: 3px; height: 4px; margin-top: 6px; }
     .bar { height: 4px; border-radius: 3px; background: #1D9E75; }
-    .ai-msg { font-size: 14px; color: #555; line-height: 1.65; padding: 0.75rem 1rem; background: #f8f8f8; border-radius: 8px; margin: 0.75rem 0 1.25rem; }
+    .ai-msg { font-size: 14px; color: #555; line-height: 1.65; padding: 0.75rem 1rem; background: #f8f8f8; border-radius: 8px; margin: 0.75rem 0 1rem; }
+
+    /* ツールチップ */
+    .tooltip { position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); background: #222; color: white; font-size: 12px; padding: 8px 10px; border-radius: 8px; width: 200px; text-align: left; line-height: 1.5; z-index: 10; display: none; pointer-events: none; }
+    .tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: #222; }
+    .sc:hover .tooltip { display: block; }
+
+    /* スコア統計 */
+    .stats-box { background: #f8f8f8; border-radius: 10px; padding: 0.75rem 1rem; margin-bottom: 1rem; }
+    .stats-title { font-size: 11px; color: #aaa; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+    .stats-row { display: flex; justify-content: space-between; font-size: 13px; color: #555; margin-bottom: 4px; }
+    .stats-row:last-child { margin-bottom: 0; }
+    .stats-val { font-weight: 600; color: #111; }
+    .stats-highlight { color: #1D9E75; }
+    .stats-low { color: #f59e0b; }
+
+    /* 例セクション */
+    .example-box { border: 1px solid #efefef; border-radius: 10px; margin-bottom: 1rem; overflow: hidden; }
+    .example-header { display: flex; gap: 8px; padding: 0.75rem 1rem; cursor: pointer; align-items: center; }
+    .example-header:hover { background: #f8f8f8; }
+    .example-badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+    .badge-high { background: #E1F5EE; color: #085041; }
+    .badge-low { background: #FEF3C7; color: #92400E; }
+    .example-title { font-size: 13px; color: #555; flex: 1; }
+    .example-arrow { font-size: 12px; color: #bbb; transition: transform 0.2s; }
+    .example-arrow.open { transform: rotate(180deg); }
+    .example-body { display: none; padding: 0 1rem 0.75rem; font-size: 13px; color: #555; line-height: 1.6; border-top: 1px solid #f0f0f0; margin-top: 0; padding-top: 0.75rem; }
+    .example-score { display: flex; gap: 6px; margin-top: 0.5rem; flex-wrap: wrap; }
+    .ex-sc { font-size: 11px; background: #f0f0f0; padding: 2px 8px; border-radius: 20px; color: #666; }
+
     .sats-label { font-size: 13px; color: #888; margin-bottom: 6px; text-align: center; }
     .sats-num { font-size: 36px; font-weight: 700; color: #f59e0b; margin-bottom: 1.25rem; text-align: center; }
     .qr-wrap { display: flex; justify-content: center; margin-bottom: 1rem; }
@@ -117,8 +143,55 @@
   <!-- 結果画面 -->
   <div class="result" id="result-view">
     <h1 id="result-title">評価結果</h1>
+
+    <!-- スコア（ホバーで定義表示） -->
     <div class="scores" id="scores"></div>
+
+    <!-- AIコメント -->
     <div class="ai-msg" id="ai-msg"></div>
+
+    <!-- スコア統計 -->
+    <div class="stats-box" id="stats-box">
+      <div class="stats-title" id="stats-title">みんなのスコア統計</div>
+      <div class="stats-row"><span id="stats-avg-lbl">平均スコア</span><span class="stats-val" id="stats-avg">--</span></div>
+      <div class="stats-row"><span id="stats-high-lbl">最高スコア</span><span class="stats-val stats-highlight" id="stats-high">--</span></div>
+      <div class="stats-row"><span id="stats-low-lbl">最低スコア</span><span class="stats-val stats-low" id="stats-low">--</span></div>
+      <div class="stats-row"><span id="stats-count-lbl">総回答数</span><span class="stats-val" id="stats-count">--</span></div>
+    </div>
+
+    <!-- 高得点・低得点の例 -->
+    <div class="example-box">
+      <div class="example-header" onclick="toggleExample('ex-high')">
+        <span class="example-badge badge-high" id="ex-high-badge">高得点の例</span>
+        <span class="example-title" id="ex-high-title">こんなフィードバックが高スコアです</span>
+        <span class="example-arrow" id="ex-high-arrow">▼</span>
+      </div>
+      <div class="example-body" id="ex-high">
+        <span id="ex-high-text">Lightning報酬の即時性は素晴らしいです。ただ、AIの採点基準が不透明で、なぜこのスコアになったのか理解しにくいです。具体的には「Specificity」の定義と、高スコアを取るための例を3つほどフォーム上に表示してほしいです。</span>
+        <div class="example-score" id="ex-high-scores">
+          <span class="ex-sc">具体性 9/10</span>
+          <span class="ex-sc">有用性 8/10</span>
+          <span class="ex-sc">バランス 8/10</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="example-box" style="margin-bottom:1rem;">
+      <div class="example-header" onclick="toggleExample('ex-low')">
+        <span class="example-badge badge-low" id="ex-low-badge">低得点の例</span>
+        <span class="example-title" id="ex-low-title">こんなフィードバックは低スコアです</span>
+        <span class="example-arrow" id="ex-low-arrow">▼</span>
+      </div>
+      <div class="example-body" id="ex-low">
+        <span id="ex-low-text">良かったです。</span>
+        <div class="example-score" id="ex-low-scores">
+          <span class="ex-sc">具体性 1/10</span>
+          <span class="ex-sc">有用性 1/10</span>
+          <span class="ex-sc">バランス 2/10</span>
+        </div>
+      </div>
+    </div>
+
     <div class="sats-label" id="sats-label">獲得報酬</div>
     <div class="sats-num" id="sats-num">-- sats</div>
     <div class="qr-wrap"><div id="qrcode"></div></div>
@@ -131,6 +204,15 @@
 </div>
 
 <script>
+  // 擬似的なスコア統計（実際はAPIから取得するのが理想）
+  // 昨日のフィードバックデータから算出した実績値
+  const STATS = {
+    avg: 5.2,
+    high: 9.0,
+    low: 1.0,
+    count: 89,
+  };
+
   const i18n = {
     ja: {
       title: 'SatsReview について',
@@ -151,6 +233,24 @@
       expire: '※ このQRは1回のみ使用できます',
       back: '← 別のフィードバックを送る',
       scoreNames: { specificity: '具体性', actionability: '有用性', sentiment_balance: 'バランス' },
+      tooltips: {
+        specificity: '具体性：具体的な場面・名前・エピソードが含まれているか。「良かった」より「〇〇の部分が△△という理由で良かった」が高得点。',
+        actionability: '有用性：改善提案や次回への示唆があるか。「〇〇を追加してほしい」など行動につながる内容が高得点。',
+        sentiment_balance: 'バランス：ポジティブ・ネガティブ両方の視点があるか。建設的な批評が含まれると高得点。',
+      },
+      statsTitle: 'みんなのスコア統計',
+      statsAvg: '平均スコア',
+      statsHigh: '最高スコア',
+      statsLow: '最低スコア',
+      statsCount: '総回答数',
+      exHighBadge: '高得点の例',
+      exHighTitle: 'こんなフィードバックが高スコアです',
+      exHighText: 'Lightning報酬の即時性は素晴らしいです。ただ、AIの採点基準が不透明で、なぜこのスコアになったのか理解しにくいです。具体的には「Specificity」の定義と、高スコアを取るための例を3つほどフォーム上に表示してほしいです。',
+      exHighScores: ['具体性 9/10', '有用性 8/10', 'バランス 8/10'],
+      exLowBadge: '低得点の例',
+      exLowTitle: 'こんなフィードバックは低スコアです',
+      exLowText: '良かったです。',
+      exLowScores: ['具体性 1/10', '有用性 1/10', 'バランス 2/10'],
       copied: 'コピーしました！',
       errShort: 'コメントを入力してください',
       errApi: 'エラーが発生しました: ',
@@ -174,6 +274,24 @@
       expire: '※ This QR can only be used once',
       back: '← Submit another feedback',
       scoreNames: { specificity: 'Specificity', actionability: 'Usefulness', sentiment_balance: 'Balance' },
+      tooltips: {
+        specificity: 'Specificity: Does it include concrete scenes, names, or episodes? "The onboarding flow was confusing on step 3" scores higher than "It was confusing."',
+        actionability: 'Usefulness: Does it include suggestions or improvements? "Please add X feature" or "Consider changing Y" scores high.',
+        sentiment_balance: 'Balance: Does it include both positive and negative perspectives? Constructive criticism with context scores high.',
+      },
+      statsTitle: 'Score Statistics',
+      statsAvg: 'Average score',
+      statsHigh: 'Highest score',
+      statsLow: 'Lowest score',
+      statsCount: 'Total responses',
+      exHighBadge: 'High score example',
+      exHighTitle: 'This kind of feedback scores high',
+      exHighText: 'The instant Lightning reward is brilliant. However, the AI scoring criteria feel opaque — it\'s hard to understand why I got this score. Specifically, please display the definition of "Specificity" and 3 example high-scoring feedbacks directly on the form.',
+      exHighScores: ['Specificity 9/10', 'Usefulness 8/10', 'Balance 8/10'],
+      exLowBadge: 'Low score example',
+      exLowTitle: 'This kind of feedback scores low',
+      exLowText: 'It was good.',
+      exLowScores: ['Specificity 1/10', 'Usefulness 1/10', 'Balance 2/10'],
       copied: 'Copied!',
       errShort: 'Please enter a comment',
       errApi: 'Error: ',
@@ -197,6 +315,24 @@
       expire: '※ 이 QR은 한 번만 사용할 수 있습니다',
       back: '← 다른 피드백 보내기',
       scoreNames: { specificity: '구체성', actionability: '유용성', sentiment_balance: '균형' },
+      tooltips: {
+        specificity: '구체성: 구체적인 장면, 이름, 에피소드가 포함되어 있나요? "좋았어요"보다 "〇〇 부분이 △△ 이유로 좋았어요"가 높은 점수를 받습니다.',
+        actionability: '유용성: 개선 제안이나 다음 단계에 대한 제안이 있나요? "〇〇 기능을 추가해 주세요" 같은 실행 가능한 내용이 높은 점수입니다.',
+        sentiment_balance: '균형: 긍정적·부정적 관점이 모두 포함되어 있나요? 건설적인 비평이 포함되면 높은 점수를 받습니다.',
+      },
+      statsTitle: '모두의 점수 통계',
+      statsAvg: '평균 점수',
+      statsHigh: '최고 점수',
+      statsLow: '최저 점수',
+      statsCount: '총 응답 수',
+      exHighBadge: '고득점 예시',
+      exHighTitle: '이런 피드백이 높은 점수를 받습니다',
+      exHighText: 'Lightning 즉시 보상은 훌륭합니다. 다만 AI 채점 기준이 불투명해서 왜 이 점수가 나왔는지 이해하기 어렵습니다. 구체적으로 "Specificity"의 정의와 고득점 예시 3개를 폼에 직접 표시해 주세요.',
+      exHighScores: ['구체성 9/10', '유용성 8/10', '균형 8/10'],
+      exLowBadge: '저득점 예시',
+      exLowTitle: '이런 피드백은 낮은 점수를 받습니다',
+      exLowText: '좋았어요.',
+      exLowScores: ['구체성 1/10', '유용성 1/10', '균형 2/10'],
       copied: '복사했습니다！',
       errShort: '의견을 입력해 주세요',
       errApi: '오류가 발생했습니다: ',
@@ -226,11 +362,36 @@
     document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('on'));
     btn.classList.add('on');
     document.querySelectorAll('.choice').forEach(c => c.classList.remove('on'));
+
+    // 統計・例のテキストも更新
+    document.getElementById('stats-title').textContent = t.statsTitle;
+    document.getElementById('stats-avg-lbl').textContent = t.statsAvg;
+    document.getElementById('stats-high-lbl').textContent = t.statsHigh;
+    document.getElementById('stats-low-lbl').textContent = t.statsLow;
+    document.getElementById('stats-count-lbl').textContent = t.statsCount;
+    document.getElementById('ex-high-badge').textContent = t.exHighBadge;
+    document.getElementById('ex-high-title').textContent = t.exHighTitle;
+    document.getElementById('ex-high-text').textContent = t.exHighText;
+    document.getElementById('ex-low-badge').textContent = t.exLowBadge;
+    document.getElementById('ex-low-title').textContent = t.exLowTitle;
+    document.getElementById('ex-low-text').textContent = t.exLowText;
+    const highScores = document.getElementById('ex-high-scores').querySelectorAll('.ex-sc');
+    const lowScores = document.getElementById('ex-low-scores').querySelectorAll('.ex-sc');
+    t.exHighScores.forEach((s, i) => { if (highScores[i]) highScores[i].textContent = s; });
+    t.exLowScores.forEach((s, i) => { if (lowScores[i]) lowScores[i].textContent = s; });
   }
 
   function pick(el) {
     el.closest('.choices').querySelectorAll('.choice').forEach(c => c.classList.remove('on'));
     el.classList.add('on');
+  }
+
+  function toggleExample(id) {
+    const body = document.getElementById(id);
+    const arrow = document.getElementById(id + '-arrow');
+    const isOpen = body.style.display === 'block';
+    body.style.display = isOpen ? 'none' : 'block';
+    arrow.classList.toggle('open', !isOpen);
   }
 
   async function submitForm() {
@@ -264,15 +425,27 @@
   function showResult(data) {
     const t = i18n[currentLang];
     const scoreKeys = ['specificity', 'actionability', 'sentiment_balance'];
+    const tooltipKeys = ['specificity', 'actionability', 'sentiment_balance'];
+
     const scoresHtml = scoreKeys.map(k => `
       <div class="sc">
+        <div class="tooltip">${t.tooltips[k]}</div>
         <div class="sc-num">${data.scores[k]}/10</div>
         <div class="bar-bg"><div class="bar" style="width:${data.scores[k]*10}%"></div></div>
-        <div class="sc-lbl">${t.scoreNames[k]}</div>
+        <div class="sc-lbl">${t.scoreNames[k]} <span class="sc-info">?</span></div>
       </div>`).join('');
     document.getElementById('scores').innerHTML = scoresHtml;
+
     document.getElementById('result-title').textContent = t.resultTitle;
     document.getElementById('ai-msg').textContent = data.comment;
+
+    // 統計表示
+    const myAvg = ((data.scores.specificity + data.scores.actionability + data.scores.sentiment_balance) / 3).toFixed(1);
+    document.getElementById('stats-avg').textContent = STATS.avg + ' / あなた: ' + myAvg;
+    document.getElementById('stats-high').textContent = STATS.high;
+    document.getElementById('stats-low').textContent = STATS.low;
+    document.getElementById('stats-count').textContent = (STATS.count + 1) + '件';
+
     document.getElementById('sats-label').textContent = t.satsLabel;
     document.getElementById('sats-num').textContent = data.sats + ' sats';
     document.getElementById('scan-msg').textContent = t.scanMsg;
