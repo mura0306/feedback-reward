@@ -110,17 +110,17 @@ async function createWithdrawLink(sats, memo) {
 
 // Googleスプレッドシートに保存
 async function saveToSheets({ lang, scores, sats, comment }) {
-  const response = await fetch(SHEETS_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain' },
-    body: JSON.stringify({
-      lang:              lang || 'ja',
-      specificity:       scores.specificity,
-      actionability:     scores.actionability,
-      sentiment_balance: scores.sentiment_balance,
-      sats,
-      comment,
-    }),
+  const params = new URLSearchParams({
+    lang:              lang || 'ja',
+    specificity:       scores.specificity,
+    actionability:     scores.actionability,
+    sentiment_balance: scores.sentiment_balance,
+    sats,
+    comment,
+  });
+  const response = await fetch(SHEETS_URL + '?' + params.toString(), {
+    method: 'GET',
+    redirect: 'follow',
   });
   console.log('Sheets status:', response.status);
 }
