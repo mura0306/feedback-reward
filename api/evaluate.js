@@ -2,13 +2,14 @@
 const LNBITS_URL    = process.env.LNBITS_URL;
 const LNBITS_KEY    = process.env.LNBITS_API_KEY;
 const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
+const SHEETS_URL    = 'https://script.google.com/macros/s/AKfycbxWlpkpaB48uQdzd_m7-PXaoCJeFIT5CbO048WOHAADYcZRuzDPGxD6GTMZQlZSNr_3/exec';
 const BASE_SATS     = 1;
 const MAX_SATS      = 10;
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { comment, star } = req.body;
+  const { comment, star, lang } = req.body;
   if (!comment || comment.length < 5) return res.status(400).json({ error: 'コメントが短すぎます' });
 
   try {
@@ -20,12 +21,16 @@ export default async function handler(req, res) {
     // 2. LNURLw Withdraw Link発行
     const withdrawLink = await createWithdrawLink(sats, comment);
 
+    // 3. Googleスプレッドシートに保存（失敗してもメイン処理は継続）
+    saveToSheets({ lang, scores, sats, comment }).catch(err => {
+      console.error('Sheets保存エラー:', err.message);
+    });
+
     res.status(200).json({
       scores,
       comment: scores.comment,
       sats,
-      lnurl: withdrawLink.lnurl,         // QRコード用
-      withdrawUrl: withdrawLink.url,      // デバッグ用
+      lnurl: withdrawLink.lnurl,
     });
   } catch (err) {
     console.error('ERROR:', err.message);
@@ -34,7 +39,7 @@ export default async function handler(req, res) {
 }
 
 async function evaluateWithClaude(comment, star) {
-  const prompt = `イベントフィードバックを3軸で評価し、JSONのみ返してください。余計な文字は不要です。
+  const prompt = `SatsReviewというサービスへのフィードバックを3軸で評価し、JSONのみ返してください。余計な文字は不要です。
 
 フィードバック:「${comment}」
 星評価: ${star || '未選択'}/5
@@ -59,13 +64,8 @@ async function evaluateWithClaude(comment, star) {
   const data = await response.json();
   console.log('Anthropic status:', response.status);
 
-  if (!response.ok) {
-    throw new Error(`Anthropic APIエラー: ${data.error?.message || response.status}`);
-  }
-
-  if (!data.content || !Array.isArray(data.content)) {
-    throw new Error(`予期しないレスポンス: ${JSON.stringify(data)}`);
-  }
+  if (!response.ok) throw new Error(`Anthropic APIエラー: ${data.error?.message || response.status}`);
+  if (!data.content || !Array.isArray(data.content)) throw new Error(`予期しないレスポンス: ${JSON.stringify(data)}`);
 
   const raw    = data.content.map(i => i.text || '').join('').replace(/```json|```/g, '').trim();
   const result = JSON.parse(raw);
@@ -78,7 +78,6 @@ async function evaluateWithClaude(comment, star) {
   };
 }
 
-// LNURLw Withdraw Linkを発行
 async function createWithdrawLink(sats, memo) {
   const response = await fetch(`${LNBITS_URL}/withdraw/api/v1/links`, {
     method: 'POST',
@@ -87,28 +86,39 @@ async function createWithdrawLink(sats, memo) {
       'X-Api-Key': LNBITS_KEY,
     },
     body: JSON.stringify({
-      title:       memo.slice(0, 250),
+      title:            memo.slice(0, 250),
       min_withdrawable: sats,
       max_withdrawable: sats,
-      uses:        1,       // 1回だけ使える
-      wait_time:   1,
-      is_unique:   true,    // ユニークなリンク
-      memo:        memo.slice(0, 250),
+      uses:             1,
+      wait_time:        1,
+      is_unique:        true,
+      memo:             memo.slice(0, 250),
     }),
   });
 
   console.log('LNURLw status:', response.status);
-
   if (!response.ok) {
     const err = await response.text();
     throw new Error(`LNURLwエラー: ${err}`);
   }
 
   const data = await response.json();
-  console.log('LNURLw response:', JSON.stringify(data));
+  return { lnurl: data.lnurl };
+}
 
-  return {
-    lnurl: data.lnurl,
-    url:   data.id,
-  };
+// Googleスプレッドシートに保存
+async function saveToSheets({ lang, scores, sats, comment }) {
+  const response = await fetch(SHEETS_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify({
+      lang:              lang || 'ja',
+      specificity:       scores.specificity,
+      actionability:     scores.actionability,
+      sentiment_balance: scores.sentiment_balance,
+      sats,
+      comment,
+    }),
+  });
+  console.log('Sheets status:', response.status);
 }
