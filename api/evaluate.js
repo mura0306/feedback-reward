@@ -9,7 +9,7 @@ const MAX_SATS      = 10;
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { comment, star, lang } = req.body;
+  const { comment, star, lang, q1Answer, q2Answer } = req.body;
   if (!comment || comment.length < 5) return res.status(400).json({ error: 'コメントが短すぎます' });
 
   try {
@@ -22,7 +22,7 @@ export default async function handler(req, res) {
     const withdrawLink = await createWithdrawLink(sats, comment);
 
     // 3. Googleスプレッドシートに保存（失敗してもメイン処理は継続）
-    saveToSheets({ lang, scores, sats, comment }).catch(err => {
+    saveToSheets({ lang, scores, sats, comment, q1Answer, q2Answer }).catch(err => {
       console.error('Sheets保存エラー:', err.message);
     });
 
@@ -115,7 +115,7 @@ async function createWithdrawLink(sats, memo) {
 }
 
 // Googleスプレッドシートに保存
-async function saveToSheets({ lang, scores, sats, comment }) {
+async function saveToSheets({ lang, scores, sats, comment, q1Answer, q2Answer }) {
   const response = await fetch(SHEETS_URL, {
     method: 'POST',
     redirect: 'follow',
@@ -127,6 +127,8 @@ async function saveToSheets({ lang, scores, sats, comment }) {
       sentiment_balance: scores.sentiment_balance,
       sats,
       comment,
+      q1Answer:          q1Answer || '未回答',
+      q2Answer:          q2Answer || '未回答',
     }),
   });
   console.log('Sheets status:', response.status);
