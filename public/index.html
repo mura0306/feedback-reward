@@ -133,6 +133,16 @@
 
     <button class="btn" id="submit-btn" onclick="submitForm()">送信して報酬を受け取る ⚡</button>
 
+    <div style="text-align:center;margin-top:0.75rem;">
+      <button onclick="toggleDonate()" style="font-size:13px;color:#aaa;background:none;border:none;cursor:pointer;text-decoration:underline;" id="donate-toggle-btn">⚡ このサービスを応援する（寄付）</button>
+    </div>
+    <div id="donate-box" style="display:none;margin-top:1rem;text-align:center;border:1px solid #efefef;border-radius:12px;padding:1.25rem;">
+      <div style="font-size:13px;color:#555;margin-bottom:0.75rem;" id="donate-msg">報酬の原資になります。ありがとうございます ⚡</div>
+      <div id="donate-qr" style="display:flex;justify-content:center;margin-bottom:0.75rem;"></div>
+      <div style="font-size:11px;color:#aaa;word-break:break-all;background:#f8f8f8;padding:8px;border-radius:6px;cursor:pointer;" onclick="copyDonate()" id="donate-lnurl">lnurlp://lnbits.wolfcoil.com/lnurlp/5vQZzD</div>
+      <div style="font-size:11px;color:#bbb;margin-top:6px;" id="donate-hint">クリックでコピー</div>
+    </div>
+
     <!-- フォームページの統計 -->
     <div class="stats-box" id="form-stats-box">
       <div class="stats-title" id="form-stats-title">みんなのスコア統計</div>
@@ -271,7 +281,28 @@
     ['form-stats-count','stats-count'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = count; });
   }
 
-  window.addEventListener('load', loadStats);
+  window.addEventListener('load', () => {
+    loadStats();
+    // 寄付QRコードを生成
+    new QRCode(document.getElementById('donate-qr'), {
+      text: 'lnurlp://lnbits.wolfcoil.com/lnurlp/5vQZzD',
+      width: 180, height: 180, colorDark: '#111', colorLight: '#ffffff',
+    });
+  });
+
+  function toggleDonate() {
+    const box = document.getElementById('donate-box');
+    const isOpen = box.style.display === 'block';
+    box.style.display = isOpen ? 'none' : 'block';
+  }
+
+  function copyDonate() {
+    navigator.clipboard.writeText('lnurlp://lnbits.wolfcoil.com/lnurlp/5vQZzD').then(() => {
+      const el = document.getElementById('donate-hint');
+      el.textContent = 'コピーしました！';
+      setTimeout(() => { el.textContent = 'クリックでコピー'; }, 1500);
+    });
+  }
 
   const i18n = {
     ja: {
