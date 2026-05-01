@@ -183,6 +183,23 @@
           <span class="ex-sc" id="form-ex-low-sc3">バランス 2/10</span>
         </div>
       </div>
+
+    <!-- スコア基準の説明 -->
+    <div class="section" style="margin-top:1rem;">
+      <span class="sec-label" id="criteria-label">スコア基準について</span>
+      <div style="margin-bottom:0.75rem;">
+        <div style="font-size:13px;font-weight:500;color:#333;margin-bottom:4px;" id="criteria-sp-title">📌 具体性（Specificity）</div>
+        <div style="font-size:13px;color:#666;line-height:1.6;" id="criteria-sp-text">具体的な場面・名前・エピソードが含まれているか。「良かった」より「〇〇の部分が△△という理由で良かった」が高得点。</div>
+      </div>
+      <div style="margin-bottom:0.75rem;">
+        <div style="font-size:13px;font-weight:500;color:#333;margin-bottom:4px;" id="criteria-ac-title">📌 有用性（Usefulness）</div>
+        <div style="font-size:13px;color:#666;line-height:1.6;" id="criteria-ac-text">改善提案や次回への示唆があるか。「〇〇を追加してほしい」など行動につながる内容が高得点。</div>
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:500;color:#333;margin-bottom:4px;" id="criteria-ba-title">📌 バランス（Balance）</div>
+        <div style="font-size:13px;color:#666;line-height:1.6;" id="criteria-ba-text">ポジティブ・ネガティブ両方の視点があるか。建設的な批評が含まれると高得点。</div>
+      </div>
+    </div>
     </div>
   </div>
 
@@ -476,6 +493,45 @@
     btn.classList.add('on');
     document.querySelectorAll('.choice').forEach(c => c.classList.remove('on'));
 
+    // スコア基準の多言語対応
+    const criteria = {
+      ja: {
+        label: 'スコア基準について',
+        spTitle: '📌 具体性（Specificity）',
+        spText: '具体的な場面・名前・エピソードが含まれているか。「良かった」より「〇〇の部分が△△という理由で良かった」が高得点。',
+        acTitle: '📌 有用性（Usefulness）',
+        acText: '改善提案や次回への示唆があるか。「〇〇を追加してほしい」など行動につながる内容が高得点。',
+        baTitle: '📌 バランス（Balance）',
+        baText: 'ポジティブ・ネガティブ両方の視点があるか。建設的な批評が含まれると高得点。',
+      },
+      en: {
+        label: 'Scoring Criteria',
+        spTitle: '📌 Specificity',
+        spText: 'Does it include concrete scenes, names, or episodes? "The onboarding step 3 was confusing" scores higher than "It was confusing."',
+        acTitle: '📌 Usefulness',
+        acText: 'Does it include suggestions or improvements? "Please add X" or "Consider changing Y" scores high.',
+        baTitle: '📌 Balance',
+        baText: 'Does it include both positive and negative perspectives? Constructive criticism with context scores high.',
+      },
+      ko: {
+        label: '점수 기준',
+        spTitle: '📌 구체성（Specificity）',
+        spText: '구체적인 장면, 이름, 에피소드가 포함되어 있나요? "좋았어요"보다 "〇〇 부분이 △△ 이유로 좋았어요"가 높은 점수입니다.',
+        acTitle: '📌 유용성（Usefulness）',
+        acText: '개선 제안이나 다음 단계에 대한 제안이 있나요? "〇〇 기능을 추가해 주세요" 같은 실행 가능한 내용이 높은 점수입니다.',
+        baTitle: '📌 균형（Balance）',
+        baText: '긍정적·부정적 관점이 모두 포함되어 있나요? 건설적인 비평이 포함되면 높은 점수를 받습니다.',
+      },
+    };
+    const cr = criteria[lang] || criteria['ja'];
+    document.getElementById('criteria-label').textContent  = cr.label;
+    document.getElementById('criteria-sp-title').textContent = cr.spTitle;
+    document.getElementById('criteria-sp-text').textContent  = cr.spText;
+    document.getElementById('criteria-ac-title').textContent = cr.acTitle;
+    document.getElementById('criteria-ac-text').textContent  = cr.acText;
+    document.getElementById('criteria-ba-title').textContent = cr.baTitle;
+    document.getElementById('criteria-ba-text').textContent  = cr.baText;
+
     // 統計・例のテキストも更新
     document.getElementById('stats-title').textContent = t.statsTitle;
     document.getElementById('stats-avg-lbl').textContent = t.statsAvg;
@@ -512,6 +568,12 @@
     const comment = document.getElementById('comment').value.trim();
     if (comment.length < 5) { alert(t.errShort); return; }
 
+    // 選択肢の回答を取得
+    const q1Selected = document.querySelector('#choices1 .choice.on');
+    const q2Selected = document.querySelector('#choices2 .choice.on');
+    const q1Answer = q1Selected ? q1Selected.textContent.trim() : '未回答';
+    const q2Answer = q2Selected ? q2Selected.textContent.trim() : '未回答';
+
     document.getElementById('submit-btn').disabled = true;
     document.getElementById('form-view').style.display = 'none';
     document.getElementById('loading-msg').textContent = t.loading;
@@ -521,7 +583,7 @@
       const res = await fetch('/api/evaluate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ comment, star: 0, lang: currentLang })
+        body: JSON.stringify({ comment, star: 0, lang: currentLang, q1Answer, q2Answer })
       });
       if (!res.ok) throw new Error('APIエラー: ' + res.status);
       const data = await res.json();
