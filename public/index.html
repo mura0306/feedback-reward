@@ -101,6 +101,48 @@
     <h1 id="title">SatsReview について</h1>
     <p class="sub" id="sub">率直な感想を聞かせてください。具体的なほど報酬が増えます ⚡</p>
 
+    <!-- フォームページの統計 -->
+    <div class="stats-box" id="form-stats-box">
+      <div class="stats-title" id="form-stats-title">みんなのスコア統計</div>
+      <div class="stats-row"><span id="form-stats-avg-lbl">平均スコア</span><span class="stats-val" id="form-stats-avg">読み込み中...</span></div>
+      <div class="stats-row"><span id="form-stats-high-lbl">最高スコア</span><span class="stats-val stats-highlight" id="form-stats-high">--</span></div>
+      <div class="stats-row"><span id="form-stats-low-lbl">最低スコア</span><span class="stats-val stats-low" id="form-stats-low">--</span></div>
+      <div class="stats-row"><span id="form-stats-count-lbl">総回答数</span><span class="stats-val" id="form-stats-count">--</span></div>
+    </div>
+
+    <!-- フォームページの例 -->
+    <div class="example-box">
+      <div class="example-header" onclick="toggleExample('form-ex-high')">
+        <span class="example-badge badge-high" id="form-ex-high-badge">高得点の例</span>
+        <span class="example-title" id="form-ex-high-title">こんなフィードバックが高スコアです</span>
+        <span class="example-arrow" id="form-ex-high-arrow">▼</span>
+      </div>
+      <div class="example-body" id="form-ex-high">
+        <span id="form-ex-high-text">Lightning報酬の即時性は素晴らしいです。ただ、AIの採点基準が不透明で、なぜこのスコアになったのか理解しにくいです。具体的には「Specificity」の定義と、高スコアを取るための例を3つほどフォーム上に表示してほしいです。</span>
+        <div class="example-score">
+          <span class="ex-sc" id="form-ex-high-sc1">具体性 9/10</span>
+          <span class="ex-sc" id="form-ex-high-sc2">有用性 8/10</span>
+          <span class="ex-sc" id="form-ex-high-sc3">バランス 8/10</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="example-box" style="margin-bottom:1rem;">
+      <div class="example-header" onclick="toggleExample('form-ex-low')">
+        <span class="example-badge badge-low" id="form-ex-low-badge">低得点の例</span>
+        <span class="example-title" id="form-ex-low-title">こんなフィードバックは低スコアです</span>
+        <span class="example-arrow" id="form-ex-low-arrow">▼</span>
+      </div>
+      <div class="example-body" id="form-ex-low">
+        <span id="form-ex-low-text">良かったです。</span>
+        <div class="example-score">
+          <span class="ex-sc" id="form-ex-low-sc1">具体性 1/10</span>
+          <span class="ex-sc" id="form-ex-low-sc2">有用性 1/10</span>
+          <span class="ex-sc" id="form-ex-low-sc3">バランス 2/10</span>
+        </div>
+      </div>
+    </div>
+
     <div class="section">
       <span class="sec-label" id="sec-label">AI評価 × Bitcoin報酬の組み合わせについて</span>
       <div class="question">
@@ -204,14 +246,32 @@
 </div>
 
 <script>
-  // 擬似的なスコア統計（実際はAPIから取得するのが理想）
-  // 昨日のフィードバックデータから算出した実績値
-  const STATS = {
-    avg: 5.2,
-    high: 9.0,
-    low: 1.0,
-    count: 89,
-  };
+  const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxWlpkpaB48uQdzd_m7-PXaoCJeFIT5CbO048WOHAADYcZRuzDPGxD6GTMZQlZSNr_3/exec';
+
+  async function loadStats() {
+    try {
+      const res = await fetch(SHEETS_URL);
+      const data = await res.json();
+      updateStatsUI(data);
+    } catch(e) {
+      console.log('統計取得失敗:', e.message);
+      updateStatsUI({ avg: '--', high: '--', low: '--', count: 0 });
+    }
+  }
+
+  function updateStatsUI(data) {
+    const hasData = data.count > 0;
+    const avg   = hasData ? data.avg : '--';
+    const high  = hasData ? data.high : '--';
+    const low   = hasData ? data.low : '--';
+    const count = hasData ? data.count + '件' : '--';
+    ['form-stats-avg','stats-avg'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = avg; });
+    ['form-stats-high','stats-high'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = high; });
+    ['form-stats-low','stats-low'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = low; });
+    ['form-stats-count','stats-count'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = count; });
+  }
+
+  window.addEventListener('load', loadStats);
 
   const i18n = {
     ja: {
@@ -439,12 +499,12 @@
     document.getElementById('result-title').textContent = t.resultTitle;
     document.getElementById('ai-msg').textContent = data.comment;
 
-    // 統計表示
+    // 統計は自動更新（loadStatsで取得済み）
     const myAvg = ((data.scores.specificity + data.scores.actionability + data.scores.sentiment_balance) / 3).toFixed(1);
-    document.getElementById('stats-avg').textContent = STATS.avg + ' / あなた: ' + myAvg;
-    document.getElementById('stats-high').textContent = STATS.high;
-    document.getElementById('stats-low').textContent = STATS.low;
-    document.getElementById('stats-count').textContent = (STATS.count + 1) + '件';
+    const avgEl = document.getElementById('stats-avg');
+    if (avgEl) avgEl.textContent = avgEl.textContent.split(' /')[0] + ' / あなた: ' + myAvg;
+    // 送信後に最新統計を再取得
+    loadStats();
 
     document.getElementById('sats-label').textContent = t.satsLabel;
     document.getElementById('sats-num').textContent = data.sats + ' sats';
