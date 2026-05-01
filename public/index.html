@@ -194,6 +194,15 @@
 
   <!-- 結果画面 -->
   <div class="result" id="result-view">
+    <div style="text-align:center;margin-bottom:1rem;">
+      <button onclick="toggleDonate()" style="font-size:13px;color:#aaa;background:none;border:none;cursor:pointer;text-decoration:underline;">⚡ このサービスを応援する（寄付）</button>
+    </div>
+    <div id="donate-box-result" style="display:none;margin-bottom:1rem;text-align:center;border:1px solid #efefef;border-radius:12px;padding:1.25rem;">
+      <div style="font-size:13px;color:#555;margin-bottom:0.75rem;">報酬の原資になります。ありがとうございます ⚡</div>
+      <div id="donate-qr-result" style="display:flex;justify-content:center;margin-bottom:0.75rem;"></div>
+      <div style="font-size:11px;color:#aaa;word-break:break-all;background:#f8f8f8;padding:8px;border-radius:6px;cursor:pointer;" onclick="copyDonate()">lnurlp://lnbits.wolfcoil.com/lnurlp/5vQZzD</div>
+      <div style="font-size:11px;color:#bbb;margin-top:6px;" id="donate-hint-result">クリックでコピー</div>
+    </div>
     <h1 id="result-title">評価結果</h1>
 
     <!-- スコア（ホバーで定義表示） -->
@@ -283,24 +292,37 @@
 
   window.addEventListener('load', () => {
     loadStats();
-    // 寄付QRコードを生成
+    // 寄付QRコードを生成（フォームページ）
     new QRCode(document.getElementById('donate-qr'), {
+      text: 'lnurlp://lnbits.wolfcoil.com/lnurlp/5vQZzD',
+      width: 180, height: 180, colorDark: '#111', colorLight: '#ffffff',
+    });
+    // 寄付QRコードを生成（結果ページ）
+    new QRCode(document.getElementById('donate-qr-result'), {
       text: 'lnurlp://lnbits.wolfcoil.com/lnurlp/5vQZzD',
       width: 180, height: 180, colorDark: '#111', colorLight: '#ffffff',
     });
   });
 
   function toggleDonate() {
-    const box = document.getElementById('donate-box');
-    const isOpen = box.style.display === 'block';
-    box.style.display = isOpen ? 'none' : 'block';
+    ['donate-box', 'donate-box-result'].forEach(id => {
+      const box = document.getElementById(id);
+      if (box) {
+        const isOpen = box.style.display === 'block';
+        box.style.display = isOpen ? 'none' : 'block';
+      }
+    });
   }
 
   function copyDonate() {
     navigator.clipboard.writeText('lnurlp://lnbits.wolfcoil.com/lnurlp/5vQZzD').then(() => {
-      const el = document.getElementById('donate-hint');
-      el.textContent = 'コピーしました！';
-      setTimeout(() => { el.textContent = 'クリックでコピー'; }, 1500);
+      ['donate-hint', 'donate-hint-result'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.textContent = 'コピーしました！';
+          setTimeout(() => { el.textContent = 'クリックでコピー'; }, 1500);
+        }
+      });
     });
   }
 
