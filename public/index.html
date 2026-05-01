@@ -280,7 +280,7 @@
     <div class="expire" id="expire"></div>
     <a class="x-share-btn" id="x-share-btn" href="#" target="_blank" rel="noopener">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-      Xでシェアする
+      結果をシェアする
     </a>
     <button class="back-btn" id="back-btn" onclick="goBack()">← 別のフィードバックを送る</button>
   </div>
@@ -631,7 +631,7 @@
     document.getElementById('sats-num').textContent = data.sats + ' sats';
 
     // Xシェアボタンのリンクを生成
-    const shareText = `AIに評価されて${data.sats} sats獲得しました！⚡\nフィードバックの質でBitcoin報酬が変わるサービスです。\n#Bitcoin #LightningNetwork #SatsReview`;
+    const shareText = `${data.sats} sats獲得しました！⚡ AIがフィードバックの質を評価してBitcoin報酬額が変わるサービスです。 #Bitcoin #LightningNetwork #SatsReview`;
     const shareUrl = 'https://feedback-reward-mu.vercel.app/';
     const xUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
     document.getElementById('x-share-btn').href = xUrl;
