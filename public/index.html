@@ -101,6 +101,38 @@
     <h1 id="title">SatsReview について</h1>
     <p class="sub" id="sub">率直な感想を聞かせてください。具体的なほど報酬が増えます ⚡</p>
 
+    <div class="section">
+      <span class="sec-label" id="sec-label">AI評価 × Bitcoin報酬の組み合わせについて</span>
+      <div class="question">
+        <div class="q-text" id="q1">「AI評価＋Bitcoin報酬」の組み合わせは自然だと思いますか？</div>
+        <div class="choices" id="choices1">
+          <div class="choice" onclick="pick(this)">不自然だと思う</div>
+          <div class="choice" onclick="pick(this)">どちらでもない</div>
+          <div class="choice" onclick="pick(this)">自然だと思う</div>
+        </div>
+      </div>
+      <hr class="divider">
+      <div class="question">
+        <div class="q-text" id="q2">この仕組みがあることで、フィードバックの質が上がると思いますか？</div>
+        <div class="choices" id="choices2">
+          <div class="choice" onclick="pick(this)">そう思わない</div>
+          <div class="choice" onclick="pick(this)">どちらでもない</div>
+          <div class="choice" onclick="pick(this)">そう思う</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <span class="sec-label" id="sec-label2">自由記述</span>
+      <textarea id="comment" placeholder="感想や改善点があれば教えてください。具体的なほど獲得satsが増えます。" oninput="document.getElementById('cc').textContent=this.value.length"></textarea>
+      <div class="char-row">
+        <span class="hint" id="hint">具体的なエピソードや改善案があるとスコアが上がります</span>
+        <span class="hint"><span id="cc">0</span>文字</span>
+      </div>
+    </div>
+
+    <button class="btn" id="submit-btn" onclick="submitForm()">送信して報酬を受け取る ⚡</button>
+
     <!-- フォームページの統計 -->
     <div class="stats-box" id="form-stats-box">
       <div class="stats-title" id="form-stats-title">みんなのスコア統計</div>
@@ -142,38 +174,6 @@
         </div>
       </div>
     </div>
-
-    <div class="section">
-      <span class="sec-label" id="sec-label">AI評価 × Bitcoin報酬の組み合わせについて</span>
-      <div class="question">
-        <div class="q-text" id="q1">「AI評価＋Bitcoin報酬」の組み合わせは自然だと思いますか？</div>
-        <div class="choices" id="choices1">
-          <div class="choice" onclick="pick(this)">不自然だと思う</div>
-          <div class="choice" onclick="pick(this)">どちらでもない</div>
-          <div class="choice" onclick="pick(this)">自然だと思う</div>
-        </div>
-      </div>
-      <hr class="divider">
-      <div class="question">
-        <div class="q-text" id="q2">この仕組みがあることで、フィードバックの質が上がると思いますか？</div>
-        <div class="choices" id="choices2">
-          <div class="choice" onclick="pick(this)">そう思わない</div>
-          <div class="choice" onclick="pick(this)">どちらでもない</div>
-          <div class="choice" onclick="pick(this)">そう思う</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="section">
-      <span class="sec-label" id="sec-label2">自由記述</span>
-      <textarea id="comment" placeholder="感想や改善点があれば教えてください。具体的なほど獲得satsが増えます。" oninput="document.getElementById('cc').textContent=this.value.length"></textarea>
-      <div class="char-row">
-        <span class="hint" id="hint">具体的なエピソードや改善案があるとスコアが上がります</span>
-        <span class="hint"><span id="cc">0</span>文字</span>
-      </div>
-    </div>
-
-    <button class="btn" id="submit-btn" onclick="submitForm()">送信して報酬を受け取る ⚡</button>
   </div>
 
   <!-- ローディング -->
