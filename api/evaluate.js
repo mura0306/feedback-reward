@@ -2,8 +2,8 @@
 const LNBITS_URL    = process.env.LNBITS_URL;
 const LNBITS_KEY    = process.env.LNBITS_API_KEY;
 const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
-const BASE_SATS     = 10;
-const MAX_SATS      = 50;
+const BASE_SATS     = 1;
+const MAX_SATS      = 10;
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
