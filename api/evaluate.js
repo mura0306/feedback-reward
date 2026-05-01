@@ -16,7 +16,7 @@ export default async function handler(req, res) {
     // 1. AIでスコア評価
     const scores = await evaluateWithClaude(comment, star);
     const avg    = (scores.specificity + scores.actionability + scores.sentiment_balance) / 3;
-    const sats   = Math.round(BASE_SATS + (avg / 10) * (MAX_SATS - BASE_SATS));
+    const sats   = avg < 1 ? 1 : Math.round(BASE_SATS + (avg / 10) * (MAX_SATS - BASE_SATS));
 
     // 2. LNURLw Withdraw Link発行
     const withdrawLink = await createWithdrawLink(sats, comment);
@@ -43,6 +43,8 @@ async function evaluateWithClaude(comment, star) {
 
 フィードバック:「${comment}」
 星評価: ${star || '未選択'}/5
+
+※意味不明・スパム・無意味な文字列・単なる記号・同じ文字の繰り返しの場合は全スコアを0にしてください。
 
 返却形式:
 {"specificity":7,"actionability":5,"sentiment_balance":6,"comment":"コメント1文目。コメント2文目。"}`;
