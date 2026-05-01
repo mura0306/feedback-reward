@@ -39,12 +39,18 @@ export default async function handler(req, res) {
 }
 
 async function evaluateWithClaude(comment, star) {
+  const HIGH_SCORE_EXAMPLE = 'Lightning報酬の即時性は素晴らしいです。ただ、AIの採点基準が不透明で、なぜこのスコアになったのか理解しにくいです。具体的には「Specificity」の定義と、高スコアを取るための例を3つほどフォーム上に表示してほしいです。';
+
   const prompt = `SatsReviewというサービスへのフィードバックを3軸で評価し、JSONのみ返してください。余計な文字は不要です。
 
 フィードバック:「${comment}」
 星評価: ${star || '未選択'}/5
 
-※意味不明・スパム・無意味な文字列・単なる記号・同じ文字の繰り返しの場合は全スコアを0にしてください。
+【重要な評価ルール】
+・意味不明・スパム・無意味な文字列・単なる記号・同じ文字の繰り返しの場合は全スコアを0にしてください。
+・以下の例文と同じ、または非常に似ている場合は各スコアを2〜3点にしてください（コピーペーストや軽微な改変を検出してください）：
+「${HIGH_SCORE_EXAMPLE}」
+・自分の言葉で書かれたオリジナルのフィードバックを高く評価してください。
 
 返却形式:
 {"specificity":7,"actionability":5,"sentiment_balance":6,"comment":"コメント1文目。コメント2文目。"}`;
@@ -110,17 +116,20 @@ async function createWithdrawLink(sats, memo) {
 
 // Googleスプレッドシートに保存
 async function saveToSheets({ lang, scores, sats, comment }) {
-  const params = new URLSearchParams({
-    lang:              lang || 'ja',
-    specificity:       scores.specificity,
-    actionability:     scores.actionability,
-    sentiment_balance: scores.sentiment_balance,
-    sats,
-    comment,
-  });
-  const response = await fetch(SHEETS_URL + '?' + params.toString(), {
-    method: 'GET',
+  const response = await fetch(SHEETS_URL, {
+    method: 'POST',
     redirect: 'follow',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({
+      lang:              lang || 'ja',
+      specificity:       scores.specificity,
+      actionability:     scores.actionability,
+      sentiment_balance: scores.sentiment_balance,
+      sats,
+      comment,
+    }),
   });
   console.log('Sheets status:', response.status);
+  const text = await response.text();
+  console.log('Sheets response:', text);
 }
