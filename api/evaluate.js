@@ -21,11 +21,6 @@ export default async function handler(req, res) {
     // 2. LNURLw Withdraw Link発行
     const withdrawLink = await createWithdrawLink(sats, comment);
 
-    // 3. Googleスプレッドシートに保存（失敗してもメイン処理は継続）
-    saveToSheets({ lang, scores, sats, comment, q1Answer, q2Answer }).catch(err => {
-      console.error('Sheets保存エラー:', err.message);
-    });
-
     res.status(200).json({
       scores,
       comment: scores.comment,
@@ -115,25 +110,4 @@ async function createWithdrawLink(sats, memo) {
   return { lnurl: data.lnurl };
 }
 
-// Googleスプレッドシートに保存
-async function saveToSheets({ lang, scores, sats, comment, q1Answer, q2Answer }) {
-  const params = new URLSearchParams({
-    lang:              lang || 'ja',
-    specificity:       String(scores.specificity),
-    actionability:     String(scores.actionability),
-    sentiment_balance: String(scores.sentiment_balance),
-    sats:              String(sats),
-    comment:           comment,
-    q1Answer:          q1Answer || '未回答',
-    q2Answer:          q2Answer || '未回答',
-    action:            'write',
-  });
-  const url = SHEETS_URL + '?' + params.toString();
-  const response = await fetch(url, {
-    method: 'GET',
-    redirect: 'follow',
-  });
-  console.log('Sheets status:', response.status);
-  const text = await response.text();
-  console.log('Sheets response:', text);
-}
+
