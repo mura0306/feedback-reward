@@ -10,7 +10,7 @@
     body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #f5f5f5; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem; }
     .card { background: white; border-radius: 16px; padding: 2rem; max-width: 520px; width: 100%; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
 
-    .lang-switch { display: flex; gap: 6px; margin-bottom: 1.25rem; }
+    .lang-switch { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1.25rem; }
     .lang-btn { padding: 6px 16px; border: 1px solid #e0e0e0; border-radius: 8px; background: #f5f5f5; font-size: 13px; color: #888; cursor: pointer; }
     .lang-btn.on { background: white; border-color: #999; color: #111; font-weight: 500; }
 
@@ -98,6 +98,8 @@
       <button class="lang-btn on" onclick="setLang('ja', this)">日本語</button>
       <button class="lang-btn" onclick="setLang('en', this)">English</button>
       <button class="lang-btn" onclick="setLang('ko', this)">한국어</button>
+      <button class="lang-btn" onclick="setLang('es', this)">Español</button>
+      <button class="lang-btn" onclick="setLang('pt', this)">Português</button>
     </div>
 
     <h1 id="title">SatsReview について</h1>
@@ -474,6 +476,88 @@
       errShort: '의견을 입력해 주세요',
       errApi: '오류가 발생했습니다: ',
     },
+    es: {
+      title: 'Sobre SatsReview',
+      sub: 'Comparte tu opinión honesta. Más específico = más sats ⚡',
+      secLabel: 'Sobre la combinación de evaluación IA × recompensa Bitcoin',
+      q1: '¿Te parece natural la combinación de "evaluación IA + recompensa Bitcoin"?',
+      c1: ['Se siente forzado', 'Neutral', 'Se siente natural'],
+      q2: '¿Crees que este sistema mejorará la calidad del feedback?',
+      c2: ['No lo creo', 'Neutral', 'Sí lo creo'],
+      secLabel2: 'Comentarios',
+      placeholder: '¿Tienes alguna opinión o sugerencia? Cuanto más específico, más sats ganas.',
+      hint: 'Los episodios concretos y las ideas de mejora aumentan tu puntuación',
+      submit: 'Enviar y reclamar recompensa ⚡',
+      loading: 'Evaluando...',
+      resultTitle: 'Tu puntuación',
+      satsLabel: 'Recompensa obtenida',
+      scanMsg: 'Escanea con tu wallet Lightning para recibir',
+      expire: '※ Este QR solo puede usarse una vez',
+      back: '← Enviar otro feedback',
+      scoreNames: { specificity: 'Especificidad', actionability: 'Utilidad', sentiment_balance: 'Equilibrio' },
+      tooltips: {
+        specificity: 'Especificidad: ¿Incluye escenas, nombres o episodios concretos? "El paso 3 del onboarding era confuso" puntúa más alto que "Era confuso."',
+        actionability: 'Utilidad: ¿Incluye sugerencias o mejoras? "Por favor añade la función X" puntúa alto.',
+        sentiment_balance: 'Equilibrio: ¿Incluye perspectivas positivas y negativas? La crítica constructiva con contexto puntúa alto.',
+      },
+      statsTitle: 'Estadísticas de puntuación',
+      statsAvg: 'Puntuación media',
+      statsHigh: 'Puntuación máxima',
+      statsLow: 'Puntuación mínima',
+      statsCount: 'Total de respuestas',
+      exHighBadge: 'Ejemplo alta puntuación',
+      exHighTitle: 'Este tipo de feedback puntúa alto',
+      exHighText: 'La recompensa instantánea vía Lightning es brillante. Sin embargo, los criterios de puntuación de la IA son opacos. Por favor, muestra la definición de "Especificidad" y 3 ejemplos de feedback con alta puntuación directamente en el formulario.',
+      exHighScores: ['Especificidad 9/10', 'Utilidad 8/10', 'Equilibrio 8/10'],
+      exLowBadge: 'Ejemplo baja puntuación',
+      exLowTitle: 'Este tipo de feedback puntúa bajo',
+      exLowText: 'Estuvo bien.',
+      exLowScores: ['Especificidad 1/10', 'Utilidad 1/10', 'Equilibrio 2/10'],
+      copied: '¡Copiado!',
+      errShort: 'Por favor, introduce un comentario',
+      errApi: 'Error: ',
+    },
+    pt: {
+      title: 'Sobre o SatsReview',
+      sub: 'Compartilhe sua opinião honesta. Quanto mais específico, mais sats ⚡',
+      secLabel: 'Sobre a combinação de avaliação IA × recompensa Bitcoin',
+      q1: 'Você acha natural a combinação de "avaliação IA + recompensa Bitcoin"?',
+      c1: ['Parece forçado', 'Neutro', 'Parece natural'],
+      q2: 'Você acha que esse sistema vai melhorar a qualidade do feedback?',
+      c2: ['Não acho', 'Neutro', 'Acho que sim'],
+      secLabel2: 'Comentários',
+      placeholder: 'Tem alguma opinião ou sugestão? Quanto mais específico, mais sats você ganha.',
+      hint: 'Episódios concretos e ideias de melhoria aumentam sua pontuação',
+      submit: 'Enviar e receber recompensa ⚡',
+      loading: 'Avaliando...',
+      resultTitle: 'Sua pontuação',
+      satsLabel: 'Recompensa obtida',
+      scanMsg: 'Escaneie com sua carteira Lightning para receber',
+      expire: '※ Este QR só pode ser usado uma vez',
+      back: '← Enviar outro feedback',
+      scoreNames: { specificity: 'Especificidade', actionability: 'Utilidade', sentiment_balance: 'Equilíbrio' },
+      tooltips: {
+        specificity: 'Especificidade: Inclui cenas, nomes ou episódios concretos? "O passo 3 do onboarding era confuso" pontua mais do que "Era confuso."',
+        actionability: 'Utilidade: Inclui sugestões ou melhorias? "Por favor adicione a função X" pontua alto.',
+        sentiment_balance: 'Equilíbrio: Inclui perspectivas positivas e negativas? Crítica construtiva com contexto pontua alto.',
+      },
+      statsTitle: 'Estatísticas de pontuação',
+      statsAvg: 'Pontuação média',
+      statsHigh: 'Pontuação máxima',
+      statsLow: 'Pontuação mínima',
+      statsCount: 'Total de respostas',
+      exHighBadge: 'Exemplo alta pontuação',
+      exHighTitle: 'Este tipo de feedback pontua alto',
+      exHighText: 'A recompensa instantânea via Lightning é brilhante. Porém, os critérios de pontuação da IA são opacos. Por favor, mostre a definição de "Especificidade" e 3 exemplos de feedback com alta pontuação diretamente no formulário.',
+      exHighScores: ['Especificidade 9/10', 'Utilidade 8/10', 'Equilíbrio 8/10'],
+      exLowBadge: 'Exemplo baixa pontuação',
+      exLowTitle: 'Este tipo de feedback pontua baixo',
+      exLowText: 'Foi bom.',
+      exLowScores: ['Especificidade 1/10', 'Utilidade 1/10', 'Equilíbrio 2/10'],
+      copied: 'Copiado!',
+      errShort: 'Por favor, insira um comentário',
+      errApi: 'Erro: ',
+    },
   };
 
   let currentLang = 'ja';
@@ -528,6 +612,24 @@
         acText: '개선 제안이나 다음 단계에 대한 제안이 있나요? "〇〇 기능을 추가해 주세요" 같은 실행 가능한 내용이 높은 점수입니다.',
         baTitle: '📌 균형（Balance）',
         baText: '긍정적·부정적 관점이 모두 포함되어 있나요? 건설적인 비평이 포함되면 높은 점수를 받습니다.',
+      },
+      es: {
+        label: 'Criterios de puntuación',
+        spTitle: '📌 Especificidad',
+        spText: '¿Incluye escenas, nombres o episodios concretos? "El paso 3 era confuso" puntúa más que "Era confuso."',
+        acTitle: '📌 Utilidad',
+        acText: '¿Incluye sugerencias de mejora? "Por favor añade X" o contenido que lleve a acciones concretas puntúa alto.',
+        baTitle: '📌 Equilibrio',
+        baText: '¿Incluye perspectivas positivas y negativas? La crítica constructiva con contexto puntúa alto.',
+      },
+      pt: {
+        label: 'Critérios de pontuação',
+        spTitle: '📌 Especificidade',
+        spText: '¿Inclui cenas, nomes ou episódios concretos? "O passo 3 era confuso" pontua mais do que "Era confuso."',
+        acTitle: '📌 Utilidade',
+        acText: 'Inclui sugestões de melhoria? "Por favor adicione X" ou conteúdo que leve a ações concretas pontua alto.',
+        baTitle: '📌 Equilíbrio',
+        baText: 'Inclui perspectivas positivas e negativas? Crítica construtiva com contexto pontua alto.',
       },
     };
     const cr = criteria[lang] || criteria['ja'];
