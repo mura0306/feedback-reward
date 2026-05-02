@@ -730,6 +730,24 @@
     // 送信後に最新統計を再取得
     loadStats();
 
+    // ブラウザから直接スプレッドシートに保存
+    const q1El = document.querySelector('#choices1 .choice.on');
+    const q2El = document.querySelector('#choices2 .choice.on');
+    const params = new URLSearchParams({
+      lang:              currentLang,
+      specificity:       String(data.scores.specificity),
+      actionability:     String(data.scores.actionability),
+      sentiment_balance: String(data.scores.sentiment_balance),
+      sats:              String(data.sats),
+      comment:           document.getElementById('comment').value.trim(),
+      q1Answer:          q1El ? q1El.textContent.trim() : '未回答',
+      q2Answer:          q2El ? q2El.textContent.trim() : '未回答',
+      action:            'write',
+    });
+    fetch(SHEETS_URL + '?' + params.toString())
+      .then(r => console.log('Sheets saved:', r.status))
+      .catch(e => console.error('Sheets error:', e.message));
+
     document.getElementById('sats-label').textContent = t.satsLabel;
     document.getElementById('sats-num').textContent = data.sats + ' sats';
 
