@@ -677,16 +677,7 @@
     const comment = document.getElementById('comment').value.trim();
     if (comment.length < 5) { alert(t.errShort); return; }
 
-    // 連続送信防止（30秒クールダウン）
-    const lastSubmit = parseInt(sessionStorage.getItem('lastSubmit') || '0');
-    const now = Date.now();
-    const cooldown = 300000;
-    if (now - lastSubmit < cooldown) {
-      const remaining = Math.ceil((cooldown - (now - lastSubmit)) / 1000);
-      alert(`連続送信を防ぐため、あと${remaining}秒お待ちください。`);
-      return;
-    }
-    sessionStorage.setItem('lastSubmit', String(now));
+
 
     // 選択肢の回答を取得
     const q1Selected = document.querySelector('#choices1 .choice.on');
