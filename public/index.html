@@ -705,6 +705,10 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ comment, star: 0, lang: currentLang, q1Answer, q2Answer })
       });
+      if (res.status === 429) {
+        const data = await res.json();
+        throw new Error(data.error || '1時間に1回まで送信できます');
+      }
       if (!res.ok) throw new Error('APIエラー: ' + res.status);
       const data = await res.json();
       showResult(data);

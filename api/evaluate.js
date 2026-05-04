@@ -3,14 +3,25 @@ const LNBITS_URL    = process.env.LNBITS_URL;
 const LNBITS_KEY    = process.env.LNBITS_API_KEY;
 const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
 const SHEETS_URL    = 'https://script.google.com/macros/s/AKfycbxWlpkpaB48uQdzd_m7-PXaoCJeFIT5CbO048WOHAADYcZRuzDPGxD6GTMZQlZSNr_3/exec';
+const REDIS_URL     = process.env.UPSTASH_REDIS_REST_URL;
+const REDIS_TOKEN   = process.env.UPSTASH_REDIS_REST_TOKEN;
 const BASE_SATS     = 1;
 const MAX_SATS      = 10;
+const RATE_LIMIT_SECONDS = 3600; // 1時間に1回
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const { comment, star, lang, q1Answer, q2Answer } = req.body;
   if (!comment || comment.length < 5) return res.status(400).json({ error: 'コメントが短すぎます' });
+
+  // IPレート制限チェック
+  const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.headers['x-real-ip'] || 'unknown';
+  const rateLimitKey = `satsreview:${ip}`;
+  const isLimited = await checkRateLimit(rateLimitKey);
+  if (isLimited) {
+    return res.status(429).json({ error: 'しばらく時間をおいてから再度お試しください（1時間に1回まで）' });
+  }
 
   try {
     // 1. AIでスコア評価
@@ -30,6 +41,26 @@ export default async function handler(req, res) {
   } catch (err) {
     console.error('ERROR:', err.message);
     res.status(500).json({ error: err.message });
+  }
+}
+
+// Upstash RedisでIPレート制限
+async function checkRateLimit(key) {
+  try {
+    const res = await fetch(`${REDIS_URL}/get/${key}`, {
+      headers: { Authorization: `Bearer ${REDIS_TOKEN}` },
+    });
+    const data = await res.json();
+    if (data.result) return true; // 制限中
+
+    // キーをセット（TTL付き）
+    await fetch(`${REDIS_URL}/set/${key}/1/ex/${RATE_LIMIT_SECONDS}`, {
+      headers: { Authorization: `Bearer ${REDIS_TOKEN}` },
+    });
+    return false;
+  } catch(e) {
+    console.error('Redis error:', e.message);
+    return false; // Redisエラー時は通す
   }
 }
 
