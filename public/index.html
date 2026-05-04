@@ -680,7 +680,7 @@
     // 連続送信防止（30秒クールダウン）
     const lastSubmit = parseInt(sessionStorage.getItem('lastSubmit') || '0');
     const now = Date.now();
-    const cooldown = 30000;
+    const cooldown = 300000;
     if (now - lastSubmit < cooldown) {
       const remaining = Math.ceil((cooldown - (now - lastSubmit)) / 1000);
       alert(`連続送信を防ぐため、あと${remaining}秒お待ちください。`);
