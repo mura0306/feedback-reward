@@ -38,6 +38,7 @@ async function evaluateWithClaude(comment, star) {
   const BLACKLIST = [
     'Lightningの即時報酬は優れた体験ですが、AIの採点基準が不透明で、評価理由が分かりにくいです。「Specificity」の定義と、高スコアの具体例を3つほど表示してほしいです。',
     'Lightningの即時フィードバックは非常に良いですが、AIの評価基準が不透明で、スコアの理由が見えません。「Specificity」の定義を明確にし、高スコアのサンプルを3つほど表示していただきたいです。',
+    '¿Menciona lo bueno y lo malo? Se aprecia más cuando la crítica es constructiva y tiene contexto.',
   ];
   const isBlacklisted = BLACKLIST.some(b => comment.includes(b.slice(0, 30)));
 
@@ -53,6 +54,7 @@ async function evaluateWithClaude(comment, star) {
 ・以下のブラックリスト文章と同じ、または非常に似ている場合は全スコアを0にしてください（botによる大量送信が確認されています）：
 「Lightningの即時報酬は優れた体験ですが、AIの採点基準が不透明で、評価理由が分かりにくいです」
 「Lightningの即時フィードバックは非常に良いですが、AIの評価基準が不透明で」
+「¿Menciona lo bueno y lo malo? Se aprecia más cuando la crítica es constructiva」
 ・以下の例文と同じ、または非常に似ている場合は各スコアを2〜3点にしてください（コピーペーストや軽微な改変を検出してください）：
 「${HIGH_SCORE_EXAMPLE}」
 ・自分の言葉で書かれたオリジナルのフィードバックを高く評価してください。
