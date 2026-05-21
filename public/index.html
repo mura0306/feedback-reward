@@ -205,8 +205,8 @@
         <div style="font-size:13px;font-weight:500;color:#333;margin-bottom:4px;" id="criteria-ba-title">📌 バランス（Balance）</div>
         <div style="font-size:13px;color:#666;line-height:1.6;" id="criteria-ba-text">ポジティブ・ネガティブ両方の視点があるか。建設的な批評が含まれると高得点。</div>
       </div>
-    <div class="cf-turnstile" id="turnstile-widget" data-sitekey="0x4AAAAAADTXsxpav6EinhUg" data-theme="auto" style="margin-top:1.5rem;transform:scale(0.85);transform-origin:left;opacity:0.7;"></div>
     </div>
+    <div class="cf-turnstile" id="turnstile-widget" data-sitekey="0x4AAAAAADTXsxpav6EinhUg" data-theme="auto" style="margin-top:1.5rem;transform:scale(0.85);transform-origin:left;opacity:0.7;"></div>
   </div>
 
   <!-- ローディング -->
@@ -719,14 +719,17 @@
 
   function showRateLimitError(message) {
     document.getElementById('form-view').style.display = 'none';
-    document.getElementById('result-area').innerHTML = `
+    document.getElementById('loading').style.display = 'none';
+    // result-viewの中身を一時的に制限エラー画面に差し替え
+    const resultView = document.getElementById('result-view');
+    resultView.innerHTML = `
       <div style="text-align:center;padding:2rem;">
         <div style="font-size:40px;margin-bottom:1rem;">⏳</div>
-        <div style="font-size:16px;font-weight:500;color:#333;margin-bottom:0.5rem;">送信制限中</div>
+        <div style="font-size:16px;font-weight:500;color:var(--color-text-primary,#333);margin-bottom:0.5rem;">送信制限中</div>
         <div style="font-size:14px;color:#888;margin-bottom:1.5rem;">${message}</div>
         <button onclick="goBack()" style="font-size:14px;color:#aaa;background:none;border:none;cursor:pointer;text-decoration:underline;">← 戻る</button>
       </div>`;
-    document.getElementById('result-view').style.display = 'block';
+    resultView.style.display = 'block';
   }
 
   function showResult(data) {
