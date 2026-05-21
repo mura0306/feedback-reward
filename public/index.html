@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SatsReview</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #f5f5f5; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem; }
@@ -135,6 +136,7 @@
       </div>
     </div>
 
+    <div class="cf-turnstile" id="turnstile-widget" data-sitekey="0x4AAAAAADTXsxpav6EinhUg" data-theme="auto" style="margin-bottom:0.75rem;"></div>
     <button class="btn" id="submit-btn" onclick="submitForm()">送信して報酬を受け取る ⚡</button>
 
     <div style="text-align:center;margin-top:0.75rem;">
@@ -694,11 +696,14 @@
       const res = await fetch('/api/evaluate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ comment, star: 0, lang: currentLang, q1Answer, q2Answer })
+        body: JSON.stringify({ comment, star: 0, lang: currentLang, q1Answer, q2Answer, turnstileToken: window.turnstile?.getResponse() || '' })
       });
       if (res.status === 429) {
-        const data = await res.json();
-        throw new Error(data.error || '1時間に1回まで送信できます');
+        const errData = await res.json();
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('submit-btn').disabled = false;
+        showRateLimitError(errData.error || '1時間に1回まで送信できます');
+        return;
       }
       if (!res.ok) throw new Error('APIエラー: ' + res.status);
       const data = await res.json();
@@ -710,6 +715,18 @@
       document.getElementById('loading').style.display = 'none';
       document.getElementById('submit-btn').disabled = false;
     }
+  }
+
+  function showRateLimitError(message) {
+    document.getElementById('form-view').style.display = 'none';
+    document.getElementById('result-area').innerHTML = `
+      <div style="text-align:center;padding:2rem;">
+        <div style="font-size:40px;margin-bottom:1rem;">⏳</div>
+        <div style="font-size:16px;font-weight:500;color:#333;margin-bottom:0.5rem;">送信制限中</div>
+        <div style="font-size:14px;color:#888;margin-bottom:1.5rem;">${message}</div>
+        <button onclick="goBack()" style="font-size:14px;color:#aaa;background:none;border:none;cursor:pointer;text-decoration:underline;">← 戻る</button>
+      </div>`;
+    document.getElementById('result-view').style.display = 'block';
   }
 
   function showResult(data) {
@@ -787,6 +804,7 @@
   function goBack() {
     document.getElementById('result-view').style.display = 'none';
     document.getElementById('form-view').style.display = 'block';
+    if (window.turnstile) window.turnstile.reset();
     document.getElementById('comment').value = '';
     document.getElementById('cc').textContent = '0';
     document.querySelectorAll('.choice').forEach(c => c.classList.remove('on'));

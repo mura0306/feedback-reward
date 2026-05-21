@@ -3,8 +3,9 @@ const LNBITS_URL    = process.env.LNBITS_URL;
 const LNBITS_KEY    = process.env.LNBITS_API_KEY;
 const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY;
 const SHEETS_URL    = 'https://script.google.com/macros/s/AKfycbxWlpkpaB48uQdzd_m7-PXaoCJeFIT5CbO048WOHAADYcZRuzDPGxD6GTMZQlZSNr_3/exec';
-const REDIS_URL     = process.env.UPSTASH_REDIS_REST_URL;
-const REDIS_TOKEN   = process.env.UPSTASH_REDIS_REST_TOKEN;
+const REDIS_URL        = process.env.UPSTASH_REDIS_REST_URL;
+const REDIS_TOKEN      = process.env.UPSTASH_REDIS_REST_TOKEN;
+const TURNSTILE_SECRET = process.env.TURNSTILE_SECRET_KEY;
 const BASE_SATS     = 1;
 const MAX_SATS      = 10;
 const RATE_LIMIT_SECONDS = 3600; // 1時間に1回
@@ -12,8 +13,14 @@ const RATE_LIMIT_SECONDS = 3600; // 1時間に1回
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { comment, star, lang, q1Answer, q2Answer } = req.body;
+  const { comment, star, lang, q1Answer, q2Answer, turnstileToken } = req.body;
   if (!comment || comment.length < 5) return res.status(400).json({ error: 'コメントが短すぎます' });
+
+  // Turnstile検証
+  const turnstileOk = await verifyTurnstile(turnstileToken, req.headers['x-forwarded-for']?.split(',')[0]?.trim());
+  if (!turnstileOk) {
+    return res.status(403).json({ error: '認証に失敗しました。もう一度お試しください。' });
+  }
 
   // IPレート制限チェック
   const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.headers['x-real-ip'] || 'unknown';
@@ -41,6 +48,28 @@ export default async function handler(req, res) {
   } catch (err) {
     console.error('ERROR:', err.message);
     res.status(500).json({ error: err.message });
+  }
+}
+
+// Cloudflare Turnstile検証
+async function verifyTurnstile(token, ip) {
+  if (!token) return false;
+  try {
+    const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        secret:   TURNSTILE_SECRET,
+        response: token,
+        remoteip: ip,
+      }),
+    });
+    const data = await res.json();
+    console.log('Turnstile result:', data.success);
+    return data.success === true;
+  } catch(e) {
+    console.error('Turnstile error:', e.message);
+    return false;
   }
 }
 
