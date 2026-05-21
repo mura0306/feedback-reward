@@ -13,7 +13,7 @@ const RATE_LIMIT_SECONDS = 3600; // 1時間に1回
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { comment, star, lang, q1Answer, q2Answer, turnstileToken } = req.body;
+  const { comment, star, lang, q1Answer, q2Answer, turnstileToken, lnAddress } = req.body;
   if (!comment || comment.length < 5) return res.status(400).json({ error: 'コメントが短すぎます' });
 
   // Turnstile検証
@@ -44,6 +44,7 @@ export default async function handler(req, res) {
       comment: scores.comment,
       sats,
       lnurl: withdrawLink.lnurl,
+      lnAddress: lnAddress || '',
     });
   } catch (err) {
     console.error('ERROR:', err.message);
