@@ -11,7 +11,7 @@
     body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: #f5f5f5; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1rem; }
     .card { background: white; border-radius: 16px; padding: 2rem; max-width: 520px; width: 100%; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
 
-    .lang-switch { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1.25rem; }
+    .lang-switch { display: flex; flex-wrap: wrap; gap: 6px; }
     .lang-btn { padding: 6px 16px; border: 1px solid #e0e0e0; border-radius: 8px; background: #f5f5f5; font-size: 13px; color: #888; cursor: pointer; }
     .lang-btn.on { background: white; border-color: #999; color: #111; font-weight: 500; }
 
@@ -95,14 +95,6 @@
 
   <!-- フォーム画面 -->
   <div id="form-view">
-    <div class="lang-switch">
-      <button class="lang-btn on" onclick="setLang('ja', this)">🇯🇵 日本語</button>
-      <button class="lang-btn" onclick="setLang('en', this)">🇺🇸 English</button>
-      <button class="lang-btn" onclick="setLang('ko', this)">🇰🇷 한국어</button>
-      <button class="lang-btn" onclick="setLang('es', this)">🇪🇸 Español</button>
-      <button class="lang-btn" onclick="setLang('pt', this)">🇧🇷 Português</button>
-    </div>
-
     <h1 id="title">SatsReview について</h1>
     <p class="sub" id="sub">率直な感想を聞かせてください。具体的なほど報酬が増えます ⚡</p>
 
@@ -213,6 +205,14 @@
       </div>
     </div>
     <div class="cf-turnstile" id="turnstile-widget" data-sitekey="0x4AAAAAADTXsxpav6EinhUg" data-theme="auto" style="margin-top:1.5rem;transform:scale(0.85);transform-origin:left;opacity:0.7;"></div>
+
+    <div class="lang-switch" style="margin-top:1.5rem;justify-content:center;">
+      <button class="lang-btn on" onclick="setLang('ja', this)">🇯🇵 日本語</button>
+      <button class="lang-btn" onclick="setLang('en', this)">🇺🇸 English</button>
+      <button class="lang-btn" onclick="setLang('ko', this)">🇰🇷 한국어</button>
+      <button class="lang-btn" onclick="setLang('es', this)">🇪🇸 Español</button>
+      <button class="lang-btn" onclick="setLang('pt', this)">🇧🇷 Português</button>
+    </div>
   </div>
 
   <!-- ローディング -->
